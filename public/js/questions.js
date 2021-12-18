@@ -1,23 +1,35 @@
 var question = {
-    loadQuestions: function () {
+    loadQuestions: function (isSelectable = false) {
         var questionsTable = $('#questionsIndexTable');
+
         if (questionsTable.length) {
             questionsTable.DataTable({
                 ajax: '/ajax/questions/getQuestions',
-                columns: [{
-                    data: 'title',
-                    name: 'title'
-                }, {
-                    data: 'question',
-                    name: 'question'
-                }, {
-                    data: 'points',
-                    name: 'points'
-                }, {
-                    data: 'type',
-                    name: 'type'
-                }],
-                responsive: true
+                columns: [
+                    {
+                        data: 'title',
+                        name: 'title',
+                        orderable: false,
+                        searchable: false
+                    }, {
+                        data: 'question',
+                        name: 'question',
+                        orderable: false,
+                        searchable: false
+                    }, {
+                        data: 'points',
+                        name: 'points',
+                        orderable: false,
+                        searchable: false
+                    }, {
+                        data: 'type',
+                        name: 'type',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                responsive: true,
+                select: isSelectable
             });
         }
     },

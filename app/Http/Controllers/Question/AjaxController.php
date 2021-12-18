@@ -28,7 +28,7 @@ class AjaxController extends AuthController
             ])->orderBy('created_at');
 
         $table = DataTables::of($questionsQuery)
-            ->editColumn('title', '<a href="/questions/{{$id}}"> {{ $title }} </a>');
+            ->editColumn('title', '<a data-question_id="{{ $id }}" href="/questions/{{$id}}"> {{ $title }} </a>');
 
         return $table->rawColumns(['title'])->make(true);
     }

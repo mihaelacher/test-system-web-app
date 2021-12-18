@@ -6,7 +6,13 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.css"/>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
 
-@if (\Illuminate\Support\Facades\Request::is('questions/*'))
+@if (\Illuminate\Support\Facades\Request::is('questions/*') || \Illuminate\Support\Facades\Request::is('tests/create'))
     <script src="http://test-system-web-app/js/questions.js"></script>
 @endif
+
+@if (\Illuminate\Support\Facades\Request::is('tests/*'))
+    <script src="http://test-system-web-app/js/tests.js"></script>
+@endif
+

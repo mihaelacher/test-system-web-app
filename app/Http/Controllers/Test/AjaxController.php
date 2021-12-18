@@ -20,12 +20,24 @@ class AjaxController extends AuthController
     {
         $questionsQuery = Test::query()
             ->select([
-                'name', 'intro_text', 'max_duration'
+                'id', 'name', 'intro_text', 'max_duration'
             ]);
 
         $table = DataTables::of($questionsQuery)
             ->editColumn('name', '<a href="/tests/{{$id}}"> {{ $name }} </a>');
 
         return $table->rawColumns(['name'])->make(true);
+    }
+
+    /**
+     * @method GET
+     * @uri ajax/tests/loadQuestions
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function loadQuestions(Request $request)
+    {
+        return view('question.index-table')
+            ->with('includeCheckbox', true);
     }
 }

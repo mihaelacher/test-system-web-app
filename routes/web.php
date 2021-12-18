@@ -44,4 +44,5 @@ Route::group(['prefix' => 'tests/'], function () {
 Route::group(['prefix' => 'ajax/'], function () {
     Route::get('questions/getQuestions', 'App\Http\Controllers\Question\AjaxController@getQuestionsDataTable');
     Route::get('tests/getTests', 'App\Http\Controllers\Test\AjaxController@getTestsDataTable');
+    Route::get('tests/loadQuestions', 'App\Http\Controllers\Test\AjaxController@loadQuestions');
 });
