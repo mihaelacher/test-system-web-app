@@ -1,6 +1,7 @@
 @extends('page-sidebar')
 @section('content')
     <div class="container">
+        <a class="btn btn-primary" href="/questions/edit/{{ $question->id }}">Edit</a>
         <h1>Question:</h1>
         <div>
             <label class="col-md-3 control-label left">Text:</label>

@@ -1,6 +1,6 @@
 @extends('page-sidebar')
 @section('content')
-    <form id="questionCreateForm" action="/questions/create" method="post">
+    <form id="questionForm" action="/questions/create" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn-primary btn">Submit</button>
     <div>

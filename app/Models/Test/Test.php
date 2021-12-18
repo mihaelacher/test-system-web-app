@@ -2,6 +2,7 @@
 
 namespace App\Models\Test;
 
+use App\Models\MainModel;
 use App\Models\ModifiableModel;
 use Carbon\Carbon;
 
@@ -26,7 +27,7 @@ use Carbon\Carbon;
  * @property int $updated_by
  *
  */
-class Test extends ModifiableModel
+class Test extends MainModel
 {
     protected $table = 'tests';
 }

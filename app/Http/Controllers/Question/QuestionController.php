@@ -86,4 +86,39 @@ class QuestionController extends AuthController
 
         return redirect('/questions');
     }
+
+    /**
+     * @method GET
+     * @uri /questions/edit/{id}
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function edit(Request $request, $id)
+    {
+        $question = Question::findOrFail($id);
+        $answers = QuestionAnswer::where('question_id', '=', $id)->orderBy('order_num')->get();
+
+        return view('question.edit')
+            ->with('questionTypes', QuestionType::all()->sortBy('id'))
+            ->with('question', $question)
+            ->with('answers', $answers);
+    }
+
+    /**
+     * @method POST
+     * @uri /questions/update/{id}
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function update(Request $request, $id)
+    {
+        QuestionService::updateQuestion(Question::findOrFail($id), $request);
+        if (!$request->is_open) {
+            QuestionService::updateQuestionAnswers($request->answer_id, $request->order_num, $request->value, $request->is_correct);
+        }
+
+        return redirect('/questions/' . $id);
+    }
 }

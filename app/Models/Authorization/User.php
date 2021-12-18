@@ -2,6 +2,7 @@
 
 namespace App\Models\Authorization;
 
+use App\Models\MainModel;
 use App\Models\ModifiableModel;
 use Carbon\Carbon;
 use Illuminate\Auth\Authenticatable;
@@ -27,7 +28,7 @@ use Illuminate\Notifications\Notifiable;
  * @property int $created_by
  * @property int $updated_by
  */
-class User extends ModifiableModel implements AuthenticatableContract, CanResetPasswordContract
+class User extends MainModel implements AuthenticatableContract, CanResetPasswordContract
 {
     use SoftDeletes, Authenticatable, CanResetPassword, Notifiable;
 

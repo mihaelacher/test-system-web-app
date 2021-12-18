@@ -2,6 +2,7 @@
 
 namespace App\Models\Question;
 
+use App\Models\MainModel;
 use App\Models\ModifiableModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $updated_by
  *
  */
-class QuestionAnswer extends ModifiableModel
+class QuestionAnswer extends MainModel
 {
     use SoftDeletes;
 

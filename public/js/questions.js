@@ -51,12 +51,12 @@ var question = {
                $('<input />').attr('type', 'hidden')
                    .attr('name', 'is_correct[]')
                    .attr('value', $(el).is(':checked') ? 1 : 0)
-                   .appendTo($('#questionCreateForm'));
+                   .appendTo($('#questionForm'));
             });
         }
     },
     attachOnSubmitHandler: function () {
-        $('#questionCreateForm').on('submit', function () {
+        $('#questionForm').on('submit', function () {
             question.generateRequestData();
         });
     },
