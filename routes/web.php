@@ -41,9 +41,22 @@ Route::group(['prefix' => 'tests/'], function () {
    Route::get('{id}', 'App\Http\Controllers\Test\TestController@show');
 });
 
+Route::group(['prefix' => 'users/'], function () {
+    Route::get('index', 'App\Http\Controllers\User\UserController@index');
+    Route::get('create', 'App\Http\Controllers\User\UserController@create');
+    Route::post('create', 'App\Http\Controllers\User\UserController@store');
+    Route::get('edit/{id}', 'App\Http\Controllers\User\UserController@edit');
+    Route::post('update/{id}', 'App\Http\Controllers\User\UserController@update');
+    Route::get('changePassword/{id}', 'App\Http\Controllers\User\UserController@changePassword');
+    Route::post('changePassword/{id}', 'App\Http\Controllers\User\UserController@storePassword');
+    Route::delete('{id}', 'App\Http\Controllers\User\UserController@delete');
+    Route::get('{id}', 'App\Http\Controllers\User\UserController@show');
+});
+
 Route::group(['prefix' => 'ajax/'], function () {
     Route::get('questions/getQuestions', 'App\Http\Controllers\Question\AjaxController@getQuestionsDataTable');
     Route::get('tests/getTests', 'App\Http\Controllers\Test\AjaxController@getTestsDataTable');
     Route::get('tests/loadQuestions', 'App\Http\Controllers\Test\AjaxController@loadQuestions');
     Route::get('tests/getTestQuestions', 'App\Http\Controllers\Test\AjaxController@getTestQuestions');
+    Route::get('users/getUsers', 'App\Http\Controllers\User\AjaxController@getUsersDatatable');
 });

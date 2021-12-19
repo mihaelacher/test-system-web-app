@@ -17,7 +17,7 @@
         <div class="list-group list-group-flush">
             <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/questions/index">Questions</a>
             <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/tests/index">Tests</a>
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Users</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/users/index">Users</a>
             <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Profile</a>
         </div>
     </div>
