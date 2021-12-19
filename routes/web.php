@@ -39,6 +39,8 @@ Route::group(['prefix' => 'tests/'], function () {
    Route::post('update/{id}', 'App\Http\Controllers\Test\TestController@update');
    Route::delete('{id}', 'App\Http\Controllers\Test\TestController@delete');
    Route::get('{id}', 'App\Http\Controllers\Test\TestController@show');
+   Route::get('inviteUsers/{id}', 'App\Http\Controllers\Test\TestController@inviteUsers');
+   Route::post('storeInvitations/{id}', 'App\Http\Controllers\Test\TestController@storeInvitations');
 });
 
 Route::group(['prefix' => 'users/'], function () {

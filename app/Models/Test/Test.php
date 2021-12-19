@@ -13,8 +13,6 @@ use Carbon\Carbon;
  * @property string $name
  * @property string $intro_text
  * @property int $max_duration
- * @property Carbon $active_from
- * @property Carbon $active_to
  * @property int $is_visible_for_admins
  * @property int $is_reexecutable
  * @property int $can_correct_answers

@@ -12,6 +12,7 @@ use App\Http\Requests\Test\TestUpdateRequest;
 use App\Models\Test\Test;
 use App\Models\Test\TestQuestions;
 use App\Services\TestService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,7 +26,8 @@ class TestController extends AuthController
      */
     public function index(TestIndexRequest $request)
     {
-        return view('test.index');
+        return view('test.index')
+            ->with('currentUser', $request->currentUser);
     }
 
     /**
@@ -41,7 +43,8 @@ class TestController extends AuthController
 
         return view('test.show')
             ->with('test', Test::findOrFail($id))
-            ->with('hasQuestions', $testHasQuestions);
+            ->with('hasQuestions', $testHasQuestions)
+            ->with('currentUser', $request->currentUser);
     }
 
     /**
@@ -119,5 +122,36 @@ class TestController extends AuthController
     public function delete(Request $request, $id)
     {
 
+    }
+
+    /**
+     * @method GET
+     * @uri /tests/inviteUsers/{id}
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function inviteUsers(Request $request, $id)
+    {
+        return view('test.invite-users')
+            ->with('test', Test::findOrFail($id));
+    }
+
+    /**
+     * @method Post
+     * @uri /tests/storeInvitations/{id}
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function storeInvitations(Request $request, $id)
+    {
+        $activeFrom = Carbon::parse($request->active_from);
+        $activeTo = Carbon::parse($request->active_to);
+
+        TestService::mapUserToTest($id,  array_unique(explode(',',  $request->selected_user_ids)),
+            $activeFrom, $activeTo);
+
+        return redirect('/tests/index');
     }
 }

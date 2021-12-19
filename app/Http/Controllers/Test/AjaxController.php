@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\Question\QuestionIndexRequest;
+use App\Http\Requests\Test\TestCreateRequest;
+use App\Http\Requests\Test\TestIndexRequest;
 use App\Models\Question\Question;
-use App\Models\Test\Test;
-use Illuminate\Http\Request;
+use App\Services\TestService;
 use Yajra\DataTables\DataTables;
 
 class AjaxController extends AuthController
@@ -13,13 +15,15 @@ class AjaxController extends AuthController
     /**
      * @method GET
      * @uri /ajax/tests/getTests
-     * @param Request $request
+     * @param TestIndexRequest $request
      * @return void
      * @throws \Exception
      */
-    public function getTestsDataTable(Request $request)
+    public function getTestsDataTable(TestIndexRequest $request)
     {
-        $questionsQuery = Test::query()
+        $currentUser = $request->currentUser;
+
+        $questionsQuery = TestService::getTestIndexQueryBasedOnLoggedUser($currentUser)
             ->select([
                 'id', 'name', 'intro_text', 'max_duration'
             ]);
@@ -33,10 +37,10 @@ class AjaxController extends AuthController
     /**
      * @method GET
      * @uri ajax/tests/loadQuestions
-     * @param Request $request
+     * @param QuestionIndexRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function loadQuestions(Request $request)
+    public function loadQuestions(QuestionIndexRequest $request)
     {
         return view('question.index-table')
             ->with('includeCheckbox', true);
@@ -45,12 +49,11 @@ class AjaxController extends AuthController
     /**
      * @uri GET
      * @uri /ajax/tests/getTestQuestions
-     * @param Request $request
-     * @param $id
+     * @param TestCreateRequest $request
      * @return mixed
      * @throws \Exception
      */
-    public function getTestQuestions(Request $request)
+    public function getTestQuestions(TestCreateRequest $request)
     {
         $testId = $request->testId;
         $isEditMode = $request->isEditMode;

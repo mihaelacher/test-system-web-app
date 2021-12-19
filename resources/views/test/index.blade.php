@@ -1,7 +1,9 @@
 @extends('page-sidebar')
 @section('content')
     <div class="portlet">
-        <a class="btn btn-primary" href="/tests/create">Create new</a>
+        @if($currentUser->is_admin)
+            <a class="btn btn-primary" href="/tests/create">Create new</a>
+        @endif
         <div class="portlet-title">
             <div class="caption">All tests </div>
         </div>

@@ -69,10 +69,17 @@ var test = {
             test.handleQuestionSelectionOnSubmit(questionsTable);
         }
     },
+    initDateTimePickers: function () {
+        $('#from-time-datetimepicker').datetimepicker({ format: 'DD.MM.YYYY HH:mm'});
+        $('#to-time-datetimepicker').datetimepicker({ format: 'DD.MM.YYYY HH:mm'});
+    },
     init:function () {
         this.loadTests();
         this.handleQuestionLoadBtn();
         this.loadTestQuestions(window.location.pathname.indexOf('edit') !== -1);
+        if (window.location.pathname.indexOf('inviteUsers') !== -1) {
+            this.initDateTimePickers();
+        }
     }
 };
 test.init();
