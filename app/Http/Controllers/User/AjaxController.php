@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\User\UserIndexRequest;
 use App\Models\Authorization\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
@@ -13,11 +13,11 @@ class AjaxController extends AuthController
     /**
      * @method GET
      * @uri /ajax/users/getUsers
-     * @param Request $request
+     * @param UserIndexRequest $request
      * @return mixed
      * @throws \Exception
      */
-    public function getUsersDatatable(Request $request)
+    public function getUsersDatatable(UserIndexRequest $request)
     {
         $questionsQuery = User::query()
             ->select([

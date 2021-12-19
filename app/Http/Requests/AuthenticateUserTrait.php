@@ -83,7 +83,6 @@ trait AuthenticateUserTrait
      * @method GET
      * @uri /auth/logout
      * @param Request $request
-     * @return void
      */
     public function logout(Request $request)
     {

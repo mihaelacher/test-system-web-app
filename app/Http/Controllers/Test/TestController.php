@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\Test\TestCreateRequest;
+use App\Http\Requests\Test\TestEditRequest;
+use App\Http\Requests\Test\TestIndexRequest;
+use App\Http\Requests\Test\TestShowRequest;
+use App\Http\Requests\Test\TestStoreRequest;
+use App\Http\Requests\Test\TestUpdateRequest;
 use App\Models\Test\Test;
 use App\Models\Test\TestQuestions;
 use App\Services\TestService;
@@ -14,10 +20,10 @@ class TestController extends AuthController
     /**
      * @method GET
      * @uri /tests/index
-     * @param Request $request
-     * @return void
+     * @param TestIndexRequest $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function index(Request $request)
+    public function index(TestIndexRequest $request)
     {
         return view('test.index');
     }
@@ -25,11 +31,11 @@ class TestController extends AuthController
     /**
      * @method GET
      * @uri /{id}
-     * @param Request $request
+     * @param TestShowRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function show(Request $request, $id)
+    public function show(TestShowRequest $request, $id)
     {
         $testHasQuestions = TestQuestions::where('test_id', '=', $id)->count();
 
@@ -41,10 +47,10 @@ class TestController extends AuthController
     /**
      * @method GET
      * @uri /tests/create
-     * @param Request $request
-     * @return void
+     * @param TestCreateRequest $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function create(Request $request)
+    public function create(TestCreateRequest $request)
     {
         return view('test.create');
     }
@@ -52,10 +58,10 @@ class TestController extends AuthController
     /**
      * @method POST
      * @uri /tests/create
-     * @param Request $request
+     * @param TestStoreRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function store(Request $request)
+    public function store(TestStoreRequest $request)
     {
         $currentUserId = Auth::user()->id;
 
@@ -72,11 +78,11 @@ class TestController extends AuthController
     /**
      * @method GET
      * @uri /tests/edit/{id}
-     * @param Request $request
+     * @param TestEditRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function edit(Request $request, $id)
+    public function edit(TestEditRequest $request, $id)
     {
         $testHasQuestions = TestQuestions::where('test_id', '=', $id)->count();
 
@@ -88,13 +94,12 @@ class TestController extends AuthController
     /**
      * @method POST
      * @uri /tests/update/{id}
-     * @param Request $request
+     * @param TestUpdateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function update(Request $request, $id)
+    public function update(TestUpdateRequest $request, $id)
     {
-        dd($request);
         TestService::updateTest(Test::findOrFail($id), $request);
 
         if (isset($request->selected_question_ids)) {

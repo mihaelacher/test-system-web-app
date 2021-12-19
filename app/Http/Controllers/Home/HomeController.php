@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends AuthController
 {
@@ -15,6 +16,12 @@ class HomeController extends AuthController
      */
     public function home(Request $request)
     {
+       /* Auth::guard()->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();*/
+
         return view('home.welcome');
     }
 }

@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Question;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\Question\QuestionIndexRequest;
 use App\Models\Question\Question;
-use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
 class AjaxController extends AuthController
 {
     /**
-     * @param Request $request
+     * @param QuestionIndexRequest $request
      * @return void
+     * @throws \Exception
      * @method GET
      * @uri /ajax/questions/getQuestions
-     * @throws \Exception
      */
-    public function getQuestionsDataTable(Request $request)
+    public function getQuestionsDataTable(QuestionIndexRequest $request)
     {
         $questionsQuery = Question::join('question_types as qt', 'qt.id', '=', 'questions.question_type_id')
             ->select([
