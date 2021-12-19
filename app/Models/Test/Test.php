@@ -14,10 +14,6 @@ use Carbon\Carbon;
  * @property string $intro_text
  * @property int $max_duration
  * @property int $is_visible_for_admins
- * @property int $is_reexecutable
- * @property int $can_correct_answers
- * @property int $are_questions_randomized
- * @property int $are_answers_randomized
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon $deleted_at

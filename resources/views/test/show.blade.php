@@ -5,6 +5,8 @@
         @if($currentUser->is_admin)
             <a class="btn btn-primary" href="/tests/edit/{{ $test->id }}">Edit</a>
             <a class="btn btn-secondary" href="/tests/inviteUsers/{{ $test->id }}">Invite users to participate</a>
+        @else
+            <a class="btn btn-primary" href="/tests/execute/{{ $test->id }}">Start</a>
         @endif
         <h1>Test:</h1>
         <div>
@@ -31,7 +33,7 @@
                 </p>
             </div>
         </div>
-        @if($hasQuestions)
+        @if($hasQuestions && $currentUser->is_admin)
             <div class="col-md-12 mt-5">
                 @include('question.index-table', ['tableId' => 'testQuestionsIndexTable'])
             </div>

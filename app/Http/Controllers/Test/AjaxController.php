@@ -25,7 +25,7 @@ class AjaxController extends AuthController
 
         $questionsQuery = TestService::getTestIndexQueryBasedOnLoggedUser($currentUser)
             ->select([
-                'id', 'name', 'intro_text', 'max_duration'
+                'tests.id', 'name', 'intro_text', 'max_duration'
             ]);
 
         $table = DataTables::of($questionsQuery)

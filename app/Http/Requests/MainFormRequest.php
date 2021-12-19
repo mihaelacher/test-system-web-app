@@ -24,4 +24,9 @@ abstract class MainFormRequest extends FormRequest
     {
         // TODO
     }
+
+    public function rules()
+    {
+        return [];
+    }
 }

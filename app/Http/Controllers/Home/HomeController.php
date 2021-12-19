@@ -15,8 +15,8 @@ class HomeController extends AuthController
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function home(Request $request)
-    {
-       /* Auth::guard()->logout();
+    {/*
+        Auth::guard()->logout();
 
         $request->session()->invalidate();
 

@@ -41,6 +41,10 @@ Route::group(['prefix' => 'tests/'], function () {
    Route::get('{id}', 'App\Http\Controllers\Test\TestController@show');
    Route::get('inviteUsers/{id}', 'App\Http\Controllers\Test\TestController@inviteUsers');
    Route::post('storeInvitations/{id}', 'App\Http\Controllers\Test\TestController@storeInvitations');
+
+   Route::group(['prefix' => 'execute/'], function() {
+
+    });
 });
 
 Route::group(['prefix' => 'users/'], function () {

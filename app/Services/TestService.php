@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Authorization\User;
 use App\Models\Test\Test;
 use App\Models\Test\TestHasVisibleUsers;
+use App\Models\Test\TestInstance;
 use App\Models\Test\TestQuestions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -87,12 +88,38 @@ class TestService
             $query->where('created_by', '=', $currentUser->id)
                 ->orWhere('is_visible_for_admins', '=', 1);
         } else {
-            $query->join('test_has_visible_users as thvu',
-                'thvu.test_id', '=', 'tests.id')
+            $query->join('test_instances as ti', 'ti.test_id', '=', 'tests.id')
+                ->join('test_has_visible_users as thvu',
+                'thvu.test_instance_id', '=', 'ti.id')
                 ->where('thvu.user_id', '=', $currentUser->id);
         }
 
         return $query;
+    }
+
+    /**
+     * @param int $testId
+     * @param Carbon $activeFrom
+     * @param Carbon $activeTo
+     * @param int $currentUserId
+     * @return int
+     */
+    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo, int $currentUserId): int
+    {
+        DB::beginTransaction();
+
+        TestInstance::insert([
+            'test_id' => $testId,
+            'active_from' => $activeFrom,
+            'active_to' => $activeTo,
+            'created_by' => $currentUserId
+        ]);
+
+        $lastInsertedRow = DB::select('SELECT LAST_INSERT_ID() as first_transaction_id', [], false);
+
+        DB::commit();
+
+        return $lastInsertedRow[0]->first_transaction_id;
     }
 
     /**
@@ -102,15 +129,13 @@ class TestService
      * @param Carbon $activeTo
      * @return void
      */
-    public static function mapUserToTest(int $testId, array $userIds, Carbon $activeFrom, Carbon $activeTo)
+    public static function mapUserToTest(int $testInstanceId, array $userIds)
     {
         $rowsForInsert = [];
 
         foreach ($userIds as $userId) {
             $rowsForInsert[] = [
-                'active_from' => $activeFrom,
-                'active_to' => $activeTo,
-                'test_id' => $testId,
+                'test_instance_id' => $testInstanceId,
                 'user_id' => $userId
             ];
         }

@@ -131,7 +131,7 @@ class TestController extends AuthController
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function inviteUsers(Request $request, $id)
+    public function inviteUsers(TestCreateRequest $request, $id)
     {
         return view('test.invite-users')
             ->with('test', Test::findOrFail($id));
@@ -144,13 +144,13 @@ class TestController extends AuthController
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function storeInvitations(Request $request, $id)
+    public function storeInvitations(TestStoreRequest $request, $id)
     {
         $activeFrom = Carbon::parse($request->active_from);
         $activeTo = Carbon::parse($request->active_to);
 
-        TestService::mapUserToTest($id,  array_unique(explode(',',  $request->selected_user_ids)),
-            $activeFrom, $activeTo);
+        $testInstanceId = TestService::createTestInstance($id, $activeFrom, $activeTo, $request->currentUser->id);
+        TestService::mapUserToTest($testInstanceId, array_unique(explode(',',  $request->selected_user_ids)));
 
         return redirect('/tests/index');
     }
