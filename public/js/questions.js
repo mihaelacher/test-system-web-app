@@ -5,29 +5,7 @@ var question = {
         if (questionsTable.length) {
             questionsTable.DataTable({
                 ajax: '/ajax/questions/getQuestions',
-                columns: [
-                    {
-                        data: 'title',
-                        name: 'title',
-                        orderable: false,
-                        searchable: false
-                    }, {
-                        data: 'question',
-                        name: 'question',
-                        orderable: false,
-                        searchable: false
-                    }, {
-                        data: 'points',
-                        name: 'points',
-                        orderable: false,
-                        searchable: false
-                    }, {
-                        data: 'type',
-                        name: 'type',
-                        orderable: false,
-                        searchable: false
-                    }
-                ],
+                columns: question.getQuestionDatatableCols(),
                 responsive: true,
                 select: isSelectable
             });
@@ -59,6 +37,31 @@ var question = {
         $('#questionForm').on('submit', function () {
             question.generateRequestData();
         });
+    },
+    getQuestionDatatableCols: function () {
+        return [
+            {
+                data: 'title',
+                name: 'title',
+                orderable: false,
+                searchable: false
+            }, {
+                data: 'question',
+                name: 'question',
+                orderable: false,
+                searchable: false
+            }, {
+                data: 'points',
+                name: 'points',
+                orderable: false,
+                searchable: false
+            }, {
+                data: 'type',
+                name: 'type',
+                orderable: false,
+                searchable: false
+            }
+        ];
     },
     init:function () {
        this.loadQuestions();

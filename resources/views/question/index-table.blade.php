@@ -1,5 +1,8 @@
+@php
+$tableId = $tableId ?? 'questionsIndexTable';
+@endphp
 <div class="table-responsive">
-    <table id="questionsIndexTable" class="table table-striped table-hover table-bordered">
+    <table id="{{ $tableId }}" class="table table-striped table-hover table-bordered">
         <thead>
         <tr>
             <th>Title</th>

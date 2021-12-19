@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Test\Test;
 use App\Models\Test\TestQuestions;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TestService
@@ -55,5 +56,19 @@ class TestService
         }
 
         TestQuestions::insert($rowsForInsert);
+    }
+
+    /**
+     * @param Test $test
+     * @param Request $request
+     * @return void
+     */
+    public static function updateTest(Test $test, Request $request)
+    {
+        $test->name = $request->name;
+        $test->intro_text = $request->intro_text;
+        $test->max_duration = $request->max_duration;
+        $test->is_visible_for_admins = $request->is_visible_for_admins;
+        $test->save();
     }
 }

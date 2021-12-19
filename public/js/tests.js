@@ -29,15 +29,16 @@ var test = {
                 btn.remove();
                 $('#questionsTable').html(data);
                 question.loadQuestions(true);
+                test.handleQuestionSelectionOnSubmit($('#questionsIndexTable'))
             });
         });
     },
-    handleQuestionSelectionOnSubmit: function () {
-        var testForm = $('#testCreateForm');
+    handleQuestionSelectionOnSubmit: function (tableSelector) {
+        var testForm = $('#testForm');
 
         testForm.on('submit', function () {
             var selectedIds = [];
-            var selectedDataTableRows = $('#questionsIndexTable').DataTable().rows({selected: true});
+            var selectedDataTableRows = tableSelector.DataTable().rows({selected: true});
 
             if (selectedDataTableRows.count()) {
                 selectedDataTableRows.data().each(function () {
@@ -53,10 +54,25 @@ var test = {
             }
         });
     },
+    loadTestQuestions: function (isSelectable) {
+        var questionsTable = $('#testQuestionsIndexTable');
+        var testId = $('#js-test-id').val();
+        var isEdit = $('#js-is-edit').val();
+
+        if (questionsTable.length) {
+            questionsTable.DataTable({
+                ajax: '/ajax/tests/getTestQuestions?testId=' + testId + (isEdit ? '&isEditMode=1' : ''),
+                columns: question.getQuestionDatatableCols(),
+                responsive: true,
+                select: isSelectable
+            });
+            test.handleQuestionSelectionOnSubmit(questionsTable);
+        }
+    },
     init:function () {
         this.loadTests();
         this.handleQuestionLoadBtn();
-        this.handleQuestionSelectionOnSubmit();
+        this.loadTestQuestions(window.location.pathname.indexOf('edit') !== -1);
     }
 };
 test.init();
