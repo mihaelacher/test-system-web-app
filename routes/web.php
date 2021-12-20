@@ -43,7 +43,10 @@ Route::group(['prefix' => 'tests/'], function () {
    Route::post('storeInvitations/{id}', 'App\Http\Controllers\Test\TestController@storeInvitations');
 
    Route::group(['prefix' => 'execute/'], function() {
-
+        Route::get('index', 'App\Http\Controllers\Test\TestExecutionController@index');
+        Route::get('show/{id}', 'App\Http\Controllers\Test\TestExecutionController@show');
+        Route::get('{id}', 'App\Http\Controllers\Test\TestExecutionController@start');
+        Route::post('{id}', 'App\Http\Controllers\Test\TestExecutionController@finish');
     });
 });
 
@@ -64,5 +67,8 @@ Route::group(['prefix' => 'ajax/'], function () {
     Route::get('tests/getTests', 'App\Http\Controllers\Test\AjaxController@getTestsDataTable');
     Route::get('tests/loadQuestions', 'App\Http\Controllers\Test\AjaxController@loadQuestions');
     Route::get('tests/getTestQuestions', 'App\Http\Controllers\Test\AjaxController@getTestQuestions');
+    Route::get('tests/getTestExecutions', 'App\Http\Controllers\Test\AjaxController@getTestExecutionsDataTable');
     Route::get('users/getUsers', 'App\Http\Controllers\User\AjaxController@getUsersDatatable');
+    Route::post('tests/execute/submitOpenQuestion/{testExecutionId}', 'App\Http\Controllers\Test\AjaxController@submitOpenQuestion');
+    Route::post('tests/execute/submitQuestionAnswer/{testExecutionId}', 'App\Http\Controllers\Test\AjaxController@submitQuestionAnswer');
 });

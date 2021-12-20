@@ -5,7 +5,7 @@
         @if($currentUser->is_admin)
             <a class="btn btn-primary" href="/tests/edit/{{ $test->id }}">Edit</a>
             <a class="btn btn-secondary" href="/tests/inviteUsers/{{ $test->id }}">Invite users to participate</a>
-        @else
+        @elseif($showStartBtn)
             <a class="btn btn-primary" href="/tests/execute/{{ $test->id }}">Start</a>
         @endif
         <h1>Test:</h1>

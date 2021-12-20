@@ -89,7 +89,7 @@ class QuestionController extends AuthController
                 $currentUserId, $questionId);
         }
 
-        return redirect('/questions');
+        return redirect('/questions/index');
     }
 
     /**

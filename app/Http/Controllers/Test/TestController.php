@@ -11,6 +11,7 @@ use App\Http\Requests\Test\TestStoreRequest;
 use App\Http\Requests\Test\TestUpdateRequest;
 use App\Models\Test\Test;
 use App\Models\Test\TestQuestions;
+use App\Services\TestExecutionService;
 use App\Services\TestService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,12 +40,16 @@ class TestController extends AuthController
      */
     public function show(TestShowRequest $request, $id)
     {
+        $currentUser = $request->currentUser;
         $testHasQuestions = TestQuestions::where('test_id', '=', $id)->count();
+        $showTestExecuteStartBtn = !$currentUser->is_admin
+            && TestExecutionService::isTestActiveForCurrentUser($id, $currentUser->id);
 
         return view('test.show')
             ->with('test', Test::findOrFail($id))
             ->with('hasQuestions', $testHasQuestions)
-            ->with('currentUser', $request->currentUser);
+            ->with('currentUser', $request->currentUser)
+            ->with('showStartBtn', $showTestExecuteStartBtn);
     }
 
     /**
@@ -71,10 +76,12 @@ class TestController extends AuthController
         $testId = TestService::storeTest($request->name, $request->intro_text, $request->max_duration,
             $request->is_visible_for_admins, $currentUserId);
 
-        if (isset($request->selected_question_ids)) {
-            $questionIds = array_unique(explode(',',  $request->selected_question_ids));
-            TestService::mapQuestionToTest($testId, array_unique($questionIds));
-        }
+        $questionIds = isset($request->selected_question_ids)
+            ? array_unique(explode(',', $request->selected_question_ids))
+            : [];
+
+        TestService::mapQuestionToTest($testId, array_unique($questionIds));
+
         return redirect('tests/index');
     }
 

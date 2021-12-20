@@ -28,4 +28,12 @@ class Question extends MainModel
     use SoftDeletes;
 
     protected $table = 'questions';
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function answers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany('App\Models\Question\QuestionAnswer', 'question_id', 'id');
+    }
 }
