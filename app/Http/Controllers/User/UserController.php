@@ -60,7 +60,9 @@ class UserController extends AuthController
      */
     public function update(UserUpdateRequest $request, $id)
     {
-        UserService::updateUser(User::findOrFail($id), $request, $request->currentUser->id);
+        UserService::updateUser(User::findOrFail($id), $request->first_name, $request->last_name, $request->username,
+            $request->email, $request->is_admin);
+
         return redirect('users/' . $id);
     }
 
@@ -83,8 +85,9 @@ class UserController extends AuthController
      */
     public function store(UserStoreRequest $request)
     {
-        UserService::createUser($request->first_name, $request->last_name, $request->username, $request->email,
-            $request->is_admin, $request->currentUser->id);
+        UserService::updateUser(new User(), $request->first_name, $request->last_name, $request->username,
+            $request->email, $request->is_admin);
+
         return redirect('/users/index');
     }
 
