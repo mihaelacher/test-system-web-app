@@ -1,6 +1,9 @@
 @extends('page-sidebar')
 @section('content')
     <div class="container">
+        @if($showEvaluateBtn)
+            <a class="btn btn-primary" href="/tests/execute/evaluate/{{ $testExecution->id }}">Evaluate</a>
+        @endif
         <h1>Test execution:</h1>
         <div>
             <label class="col-md-3 control-label left">Start time:</label>
@@ -48,7 +51,7 @@
                 @foreach($question->answers ??[] as $answer)
                     <div>
                         <input class="col-md-1" type="checkbox" disabled @if($question->answer_id == $answer->id) checked @endif/>
-                        <div class="col-md-11">{{ $answer->value }}</div>
+                        <div class="col-md-11 @if($answer->is_correct ===1) text-success @endif">{{ $answer->value }}</div>
                     </div>
                 @endforeach
             @endif

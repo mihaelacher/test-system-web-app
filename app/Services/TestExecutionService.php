@@ -176,16 +176,19 @@ class TestExecutionService
         return $query;
     }
 
-    public static function getTestQuestions(int $testId)
+    public static function getTestQuestions(int $testId, bool $onlyOpen = false)
     {
-        return Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
+        $query = Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
             ->leftJoin('test_execution_answers as tea', 'tea.question_id', '=', 'tq.question_id')
             ->where('tq.test_id', '=', $testId)
             ->select([
                 'questions.id', 'questions.text', 'questions.points',
                 'questions.is_open', 'tea.question_answer_id as answer_id', 'tea.response_text_short'
-            ])
-            ->get();
+            ]);
+        if ($onlyOpen) {
+            $query->where('questions.is_open', '=', 1);
+        }
+        return $query->get();
     }
 
     /**

@@ -141,4 +141,12 @@ class TestService
         }
         TestHasVisibleUsers::insert($rowsForInsert);
     }
+
+    public static function doesTestHaveOpenQuestions(int $testId)
+    {
+        return Test::join('test_questions as tq', 'tq.test_id', '=', 'tests.id')
+            ->join('questions as q', 'q.id', '=', 'tq.question_id')
+            ->where('q.is_open', '=', 1)
+            ->exists();
+    }
 }
