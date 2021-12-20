@@ -59,7 +59,7 @@
         </div>
         @if(!$isOpen)
             <div id="answersForm">
-                @foreach($answers ?? [] as $answer)
+                @foreach($question->answers ?? [] as $answer)
                     <input type="hidden" name="answer_id[]" value="{{ $answer->id }}">
                     <div class="col-md-12 mt-5">
                         <div class="form-group mt-5">

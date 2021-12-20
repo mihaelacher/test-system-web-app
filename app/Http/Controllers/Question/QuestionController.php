@@ -37,25 +37,10 @@ class QuestionController extends AuthController
      */
     public function show(QuestionShowRequest $request, int $id)
     {
-        $questionData = Question::join('question_types as qt',
-            'qt.id', '=', 'questions.question_type_id')
-            ->where('questions.id', '=', $id)
-            ->select([
-                'questions.*',
-                'qt.name as type',
-            ])
-            ->first();
-
-        $answers = null;
-        if (!$questionData->is_open) {
-            $answers = QuestionAnswer::where('question_id', '=', $id)
-                ->orderBy('order_num')
-                ->get();
-        }
+        $questionData = QuestionService::getQuestionShowData($id);
 
         return view('question.show')
-            ->with('question', $questionData)
-            ->with('answers', $answers);
+            ->with('question', $questionData);
     }
 
     /**
@@ -102,12 +87,10 @@ class QuestionController extends AuthController
     public function edit(QuestionEditRequest $request, $id)
     {
         $question = Question::findOrFail($id);
-        $answers = QuestionAnswer::where('question_id', '=', $id)->orderBy('order_num')->get();
 
         return view('question.edit')
             ->with('questionTypes', QuestionType::all()->sortBy('id'))
-            ->with('question', $question)
-            ->with('answers', $answers);
+            ->with('question', $question);
     }
 
     /**
@@ -121,7 +104,8 @@ class QuestionController extends AuthController
     {
         QuestionService::updateQuestion(Question::findOrFail($id), $request);
         if (!$request->is_open) {
-            QuestionService::updateQuestionAnswers($request->answer_id, $request->order_num, $request->value, $request->is_correct);
+            QuestionService::updateQuestionAnswers($request->answer_id, $request->order_num,
+                $request->value, $request->is_correct);
         }
 
         return redirect('/questions/' . $id);

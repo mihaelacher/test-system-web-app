@@ -55,13 +55,13 @@
             <label class="col-md-3 control-label left">Creation:</label>
             <div class="col-md-8">
                 <p class="form-control-plaintext">
-                    {{ \Carbon\Carbon::parse($question->created_at)->format('d.m.Y H:i:s') }}
+                    {{ \App\Services\UtilService::formatDate($question->created_at) }}
                 </p>
             </div>
         </div>
         @if(!$question->is_open)
             <h1>Answers:</h1>
-            @foreach($answers ?? [] as $answer)
+            @foreach($question->answers ?? [] as $answer)
                 <div>
                     <input class="col-md-1 disabled" disabled type="checkbox" @if($answer->is_correct) checked @endif />
                     <div class="col-md-11">

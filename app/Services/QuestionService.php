@@ -24,23 +24,17 @@ class QuestionService
     public static function storeQuestion(string $text, string $instruction, float $points, int $typeId,
                                          int $maxMarkableAnswers, int $isOpen, int $currentUserId): int
     {
-        DB::beginTransaction();
+        $question = new Question();
+        $question->text = $text;
+        $question->instruction = $instruction;
+        $question->points = $points;
+        $question->question_type_id = $typeId;
+        $question->max_markable_answers = $maxMarkableAnswers;
+        $question->is_open = $isOpen;
+        $question->created_by = $currentUserId;
+        $question->save();
 
-        Question::insert([
-           'text' => $text,
-           'instruction' => $instruction,
-           'points' => $points,
-           'question_type_id' => $typeId,
-           'max_markable_answers' => $maxMarkableAnswers,
-           'is_open' => $isOpen,
-            'created_by' => $currentUserId
-        ]);
-
-        $lastInsertedRow = DB::select('SELECT LAST_INSERT_ID() as first_transaction_id', [], false);
-
-        DB::commit();
-
-        return $lastInsertedRow[0]->first_transaction_id;
+        return $question->id;
     }
 
     /**
@@ -90,7 +84,6 @@ class QuestionService
      * @param array $answerOrderNum
      * @param array $answerValues
      * @param array $answerIsCorrect
-     * @param int $questionId
      * @return void
      */
     public static function updateQuestionAnswers(array $answerIds, array $answerOrderNum, array $answerValues, array $answerIsCorrect)
@@ -102,5 +95,21 @@ class QuestionService
             $answer->is_correct = $answerIsCorrect[$index];
             $answer->save();
         }
+    }
+
+    /**
+     * @param int $questionId
+     * @return mixed
+     */
+    public static function getQuestionShowData(int $questionId)
+    {
+        return Question::join('question_types as qt',
+            'qt.id', '=', 'questions.question_type_id')
+            ->where('questions.id', '=', $questionId)
+            ->select([
+                'questions.*',
+                'qt.name as type',
+            ])
+            ->first();
     }
 }
