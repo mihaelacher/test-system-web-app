@@ -20,6 +20,6 @@ Route::group(['prefix' => 'testexecution/'], function() {
 
 Route::group(['prefix' => 'ajax/'], function () {
     Route::get('testexecution/getTestExecutions', 'TestExecution\AjaxController@getTestExecutionsDataTable');
-    Route::post('testexecution/submitOpenQuestion/{testExecutionId}', 'TestExecution\AjaxController@submitOpenQuestion');
-    Route::post('testexecution/submitQuestionAnswer/{testExecutionId}', 'TestExecution\AjaxController@submitQuestionAnswer');
+    Route::post('testexecution/submitOpenQuestion/{id}', 'TestExecution\AjaxController@submitOpenQuestion');
+    Route::post('testexecution/submitQuestionAnswer/{id}', 'TestExecution\AjaxController@submitQuestionAnswer');
 });

@@ -47,7 +47,7 @@ class TestExecutionController extends AuthController
         return view('test-execution.show')
             ->with('showEvaluateBtn', $canCurrentUserEvaluate)
             ->with('testExecution', $testExecution)
-            ->with('questions', TestExecutionService::getTestQuestions($testExecution->test_id));
+            ->with('questions', TestExecutionService::getTestQuestions($id));
     }
 
     /**

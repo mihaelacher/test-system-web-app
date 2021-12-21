@@ -48,9 +48,12 @@
                     </div>
                 </div>
             @else
+                @php
+                    $testExecutionAnswers = explode(',', $question->answer_ids);
+                @endphp
                 @foreach($question->answers ??[] as $answer)
                     <div>
-                        <input class="col-md-1" type="checkbox" disabled @if($question->answer_id == $answer->id) checked @endif/>
+                        <input class="col-md-1" type="checkbox" disabled @if(in_array($answer->id, $testExecutionAnswers)) checked @endif/>
                         <div class="col-md-11 @if($answer->is_correct ===1) text-success @endif">{{ $answer->value }}</div>
                     </div>
                 @endforeach

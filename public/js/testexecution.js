@@ -101,7 +101,7 @@ var testExecution = {
             var executionTimeRemainingInSec = Math.ceil(parseInt(timeRemainingInSec));
 
             testCountDownTimer = setInterval(function timer() {
-                testCountDown.test(testExecution.getCountdownTimeText(executionTimeRemainingInSec));
+                testCountDown.text(testExecution.getCountdownTimeText(executionTimeRemainingInSec));
                 if (executionTimeRemainingInSec < 0) {
                     clearInterval(testCountDownTimer);
                     $('#finishExecution').trigger('click');

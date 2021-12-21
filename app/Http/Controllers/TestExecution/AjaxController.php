@@ -34,13 +34,13 @@ class AjaxController extends AuthController
 
     /**
      * @method POST
-     * @uri /ajax/testexecution/submitOpenQuestion/{testExecutionId}
+     * @uri /ajax/testexecution/submitOpenQuestion/{id}
      * @param TestExecutionSubmitAnswerRequest $request
      * @return int
      */
     public function submitOpenQuestion(TestExecutionSubmitAnswerRequest $request): int
     {
-        $testExecutionId = $request->testExecutionId;
+        $testExecutionId = $request->id;
         $questionId = $request->questionId;
         $inputText = $request->inputValue;
 
@@ -58,13 +58,13 @@ class AjaxController extends AuthController
 
     /**
      * @method POST
-     * @uri /ajax/testexecution/submitQuestionAnswer/{testExecutionId}
+     * @uri /ajax/testexecution/submitQuestionAnswer/{id}
      * @param TestExecutionSubmitAnswerRequest $request
      * @return int
      */
     public function submitQuestionAnswer(TestExecutionSubmitAnswerRequest $request): int
     {
-        $testExecutionId = $request->testExecutionId;
+        $testExecutionId = $request->id;
         $questionId = $request->questionId;
         $answerId = $request->answerId;
         $isChecked = $request->isChecked;

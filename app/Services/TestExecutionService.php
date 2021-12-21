@@ -176,14 +176,26 @@ class TestExecutionService
         return $query;
     }
 
-    public static function getTestQuestions(int $testId, bool $onlyOpen = false)
+    /**
+     * @param int $testExecutionId
+     * @param bool $onlyOpen
+     * @return mixed
+     */
+    public static function getTestQuestions(int $testExecutionId, bool $onlyOpen = false)
     {
         $query = Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
-            ->leftJoin('test_execution_answers as tea', 'tea.question_id', '=', 'tq.question_id')
-            ->where('tq.test_id', '=', $testId)
+            ->leftJoin('test_execution_answers as tea', function ($join) use ($testExecutionId) {
+                $join->on('tea.question_id', '=', 'tq.question_id')
+                    ->where('tea.test_execution_id', '=', $testExecutionId);
+            })
+            ->groupBy('questions.id')
             ->select([
-                'questions.id', 'questions.text', 'questions.points',
-                'questions.is_open', 'tea.question_answer_id as answer_id', 'tea.response_text_short'
+                'questions.id',
+                'questions.text',
+                'questions.points',
+                'questions.is_open',
+                DB::raw('GROUP_CONCAT(tea.question_answer_id) as answer_ids'),
+                'tea.response_text_short'
             ]);
         if ($onlyOpen) {
             $query->where('questions.is_open', '=', 1);

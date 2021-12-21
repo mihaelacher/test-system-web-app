@@ -9,7 +9,6 @@ class TestExecutionIndexRequest extends MainGetRequest
 
     public function authorize()
     {
-        // TODO: Implement authorize() method.
-        return true;
+        return $this->currentUser;
     }
 }
