@@ -43,12 +43,12 @@ Route::group(['prefix' => 'tests/'], function () {
    Route::post('storeInvitations/{id}', 'App\Http\Controllers\Test\TestController@storeInvitations');
 
    Route::group(['prefix' => 'execute/'], function() {
-        Route::get('index', 'App\Http\Controllers\Test\TestExecutionController@index');
-        Route::get('show/{id}', 'App\Http\Controllers\Test\TestExecutionController@show');
-       Route::get('evaluate/{id}', 'App\Http\Controllers\Test\TestExecutionController@evaluate');
-       Route::post('submit/{id}', 'App\Http\Controllers\Test\TestExecutionController@submit');
-        Route::get('{id}', 'App\Http\Controllers\Test\TestExecutionController@start');
-        Route::post('{id}', 'App\Http\Controllers\Test\TestExecutionController@finish');
+        Route::get('index', 'App\Http\Controllers\TestExecution\TestExecutionController@index');
+        Route::get('show/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@show');
+       Route::get('evaluate/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@evaluate');
+       Route::post('submit/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@submit');
+        Route::get('{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@start');
+        Route::post('{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@finish');
     });
 });
 

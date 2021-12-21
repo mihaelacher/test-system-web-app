@@ -15,7 +15,6 @@ use App\Services\TestExecutionService;
 use App\Services\TestService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class TestController extends AuthController
 {
@@ -71,16 +70,10 @@ class TestController extends AuthController
      */
     public function store(TestStoreRequest $request)
     {
-        $currentUserId = Auth::user()->id;
+        $testId = TestService::updateTest(new Test(), $request->name, $request->intro_text,
+            $request->max_duration, $request->is_visible_for_admins);
 
-        $testId = TestService::storeTest($request->name, $request->intro_text, $request->max_duration,
-            $request->is_visible_for_admins, $currentUserId);
-
-        $questionIds = isset($request->selected_question_ids)
-            ? array_unique(explode(',', $request->selected_question_ids))
-            : [];
-
-        TestService::mapQuestionToTest($testId, array_unique($questionIds));
+        TestService::mapQuestionToTest($testId, array_unique(explode(',', $request->selected_question_ids ?? [])));
 
         return redirect('tests/index');
     }
@@ -110,12 +103,10 @@ class TestController extends AuthController
      */
     public function update(TestUpdateRequest $request, $id)
     {
-        TestService::updateTest(Test::findOrFail($id), $request);
+        TestService::updateTest(Test::findOrFail($id), $request->name, $request->intro_text,
+            $request->max_duration, $request->is_visible_for_admins);
 
-        if (isset($request->selected_question_ids)) {
-            $questionIds = array_unique(explode(',',  $request->selected_question_ids));
-            TestService::mapQuestionToTest($id, array_unique($questionIds));
-        }
+        TestService::mapQuestionToTest($id, array_unique(explode(',', $request->selected_question_ids ?? [])));
 
         return redirect('tests/' . $id);
     }
@@ -147,7 +138,7 @@ class TestController extends AuthController
     /**
      * @method Post
      * @uri /tests/storeInvitations/{id}
-     * @param Request $request
+     * @param TestStoreRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
@@ -156,8 +147,8 @@ class TestController extends AuthController
         $activeFrom = Carbon::parse($request->active_from);
         $activeTo = Carbon::parse($request->active_to);
 
-        $testInstanceId = TestService::createTestInstance($id, $activeFrom, $activeTo, $request->currentUser->id);
-        TestService::mapUserToTest($testInstanceId, array_unique(explode(',',  $request->selected_user_ids)));
+        $testInstanceId = TestService::createTestInstance($id, $activeFrom, $activeTo);
+        TestService::mapUserToTest($testInstanceId, array_unique(explode(',',  $request->selected_user_ids ?? [])));
 
         return redirect('/tests/index');
     }

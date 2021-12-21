@@ -8,37 +8,27 @@ use App\Models\Test\TestHasVisibleUsers;
 use App\Models\Test\TestInstance;
 use App\Models\Test\TestQuestions;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TestService
 {
+
     /**
+     * @param Test $test
      * @param string $name
      * @param string $introText
      * @param int $maxDuration
      * @param int $isVisibleForAdmins
-     * @param int $currentUserId
      * @return int
      */
-    public static function storeTest(string $name, string $introText, int $maxDuration,
-                                     int $isVisibleForAdmins, int $currentUserId): int
+    public static function updateTest(Test $test, string $name, string $introText, int $maxDuration, int $isVisibleForAdmins): int
     {
-        DB::beginTransaction();
+        $test->name = $name;
+        $test->intro_text = $introText;
+        $test->max_duration = $maxDuration;
+        $test->is_visible_for_admins = $isVisibleForAdmins;
+        $test->save();
 
-        Test::insert([
-            'name' => $name,
-            'intro_text' => $introText,
-            'max_duration' => $maxDuration,
-            'is_visible_for_admins' => $isVisibleForAdmins,
-            'created_by' => $currentUserId
-        ]);
-
-        $lastInsertedRow = DB::select('SELECT LAST_INSERT_ID() as first_transaction_id', [], false);
-
-        DB::commit();
-
-        return $lastInsertedRow[0]->first_transaction_id;
+        return $test->id;
     }
 
     /**
@@ -60,20 +50,6 @@ class TestService
         }
 
         TestQuestions::insert($rowsForInsert);
-    }
-
-    /**
-     * @param Test $test
-     * @param Request $request
-     * @return void
-     */
-    public static function updateTest(Test $test, Request $request)
-    {
-        $test->name = $request->name;
-        $test->intro_text = $request->intro_text;
-        $test->max_duration = $request->max_duration;
-        $test->is_visible_for_admins = $request->is_visible_for_admins;
-        $test->save();
     }
 
     /**
@@ -101,25 +77,17 @@ class TestService
      * @param int $testId
      * @param Carbon $activeFrom
      * @param Carbon $activeTo
-     * @param int $currentUserId
      * @return int
      */
-    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo, int $currentUserId): int
+    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo): int
     {
-        DB::beginTransaction();
+        $testInstance = new TestInstance();
+        $testInstance->test_id = $testId;
+        $testInstance->active_from = $activeFrom;
+        $testInstance->active_to = $activeTo;
+        $testInstance->save();
 
-        TestInstance::insert([
-            'test_id' => $testId,
-            'active_from' => $activeFrom,
-            'active_to' => $activeTo,
-            'created_by' => $currentUserId
-        ]);
-
-        $lastInsertedRow = DB::select('SELECT LAST_INSERT_ID() as first_transaction_id', [], false);
-
-        DB::commit();
-
-        return $lastInsertedRow[0]->first_transaction_id;
+        return $testInstance->id;
     }
 
     /**
@@ -142,10 +110,15 @@ class TestService
         TestHasVisibleUsers::insert($rowsForInsert);
     }
 
+    /**
+     * @param int $testId
+     * @return mixed
+     */
     public static function doesTestHaveOpenQuestions(int $testId)
     {
         return Test::join('test_questions as tq', 'tq.test_id', '=', 'tests.id')
             ->join('questions as q', 'q.id', '=', 'tq.question_id')
+            ->where('tests.id', '=', $testId)
             ->where('q.is_open', '=', 1)
             ->exists();
     }

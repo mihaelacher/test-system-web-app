@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Test;
+namespace App\Http\Controllers\TestExecution;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Models\Test\Test;
@@ -10,6 +10,8 @@ use App\Services\TestService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use function redirect;
+use function view;
 
 class TestExecutionController extends AuthController
 {
