@@ -1,6 +1,6 @@
 @extends('page-sidebar')
 @section('content')
-    <form id="executionForm" action="/tests/execute/{{ $testExecutionId }}" method="post">
+    <form id="executionForm" action="/testexecution/submit/{{ $testExecutionId }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" value="{{ $timeRemainingInSec }}" id="timeRemainingInSec">
         <input type="hidden" value="{{ $testExecutionId }}" id="testExecutionId">

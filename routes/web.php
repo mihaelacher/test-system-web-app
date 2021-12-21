@@ -13,64 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'App\Http\Controllers\Home\HomeController@home');
+Route::get('/', 'Home\HomeController@home');
 
 Route::group(['prefix' => 'auth/'], function () {
-    Route::get('login', 'App\Http\Controllers\Auth\LoginController@showLoginForm');
-    Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
-    Route::get('logout', 'App\Http\Controllers\Auth\LoginController@logout');
+    Route::get('login', 'Auth\LoginController@showLoginForm');
+    Route::post('login', 'Auth\LoginController@login');
+    Route::get('logout', 'Auth\LoginController@logout');
 });
 
-Route::group(['prefix' => 'questions/'], function () {
-    Route::get('index','App\Http\Controllers\Question\QuestionController@index');
-    Route::get('create','App\Http\Controllers\Question\QuestionController@create');
-    Route::post('create','App\Http\Controllers\Question\QuestionController@store');
-    Route::get('edit/{id}','App\Http\Controllers\Question\QuestionController@edit');
-    Route::post('update/{id}','App\Http\Controllers\Question\QuestionController@update');
-    Route::get('{id}','App\Http\Controllers\Question\QuestionController@show');
-    Route::delete('{id}','App\Http\Controllers\Question\QuestionController@delete');
-});
+include('users.php');
+include('questions.php');
+include('tests.php');
+include('testexecution.php');
 
-Route::group(['prefix' => 'tests/'], function () {
-   Route::get('index', 'App\Http\Controllers\Test\TestController@index');
-   Route::get('create', 'App\Http\Controllers\Test\TestController@create');
-   Route::post('create', 'App\Http\Controllers\Test\TestController@store');
-   Route::get('edit/{id}', 'App\Http\Controllers\Test\TestController@edit');
-   Route::post('update/{id}', 'App\Http\Controllers\Test\TestController@update');
-   Route::delete('{id}', 'App\Http\Controllers\Test\TestController@delete');
-   Route::get('{id}', 'App\Http\Controllers\Test\TestController@show');
-   Route::get('inviteUsers/{id}', 'App\Http\Controllers\Test\TestController@inviteUsers');
-   Route::post('storeInvitations/{id}', 'App\Http\Controllers\Test\TestController@storeInvitations');
-
-   Route::group(['prefix' => 'execute/'], function() {
-        Route::get('index', 'App\Http\Controllers\TestExecution\TestExecutionController@index');
-        Route::get('show/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@show');
-       Route::get('evaluate/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@evaluate');
-       Route::post('submit/{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@submit');
-        Route::get('{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@start');
-        Route::post('{id}', 'App\Http\Controllers\TestExecution\TestExecutionController@finish');
-    });
-});
-
-Route::group(['prefix' => 'users/'], function () {
-    Route::get('index', 'App\Http\Controllers\User\UserController@index');
-    Route::get('create', 'App\Http\Controllers\User\UserController@create');
-    Route::post('create', 'App\Http\Controllers\User\UserController@store');
-    Route::get('edit/{id}', 'App\Http\Controllers\User\UserController@edit');
-    Route::post('update/{id}', 'App\Http\Controllers\User\UserController@update');
-    Route::get('changePassword/{id}', 'App\Http\Controllers\User\UserController@changePassword');
-    Route::post('changePassword/{id}', 'App\Http\Controllers\User\UserController@storePassword');
-    Route::delete('{id}', 'App\Http\Controllers\User\UserController@delete');
-    Route::get('{id}', 'App\Http\Controllers\User\UserController@show');
-});
-
-Route::group(['prefix' => 'ajax/'], function () {
-    Route::get('questions/getQuestions', 'App\Http\Controllers\Question\AjaxController@getQuestionsDataTable');
-    Route::get('tests/getTests', 'App\Http\Controllers\Test\AjaxController@getTestsDataTable');
-    Route::get('tests/loadQuestions', 'App\Http\Controllers\Test\AjaxController@loadQuestions');
-    Route::get('tests/getTestQuestions', 'App\Http\Controllers\Test\AjaxController@getTestQuestions');
-    Route::get('tests/getTestExecutions', 'App\Http\Controllers\Test\AjaxController@getTestExecutionsDataTable');
-    Route::get('users/getUsers', 'App\Http\Controllers\User\AjaxController@getUsersDatatable');
-    Route::post('tests/execute/submitOpenQuestion/{testExecutionId}', 'App\Http\Controllers\Test\AjaxController@submitOpenQuestion');
-    Route::post('tests/execute/submitQuestionAnswer/{testExecutionId}', 'App\Http\Controllers\Test\AjaxController@submitQuestionAnswer');
-});

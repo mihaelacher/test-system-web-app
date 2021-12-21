@@ -3,28 +3,45 @@
 namespace App\Http\Controllers\TestExecution;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\TestExecution\TestExecutionEvaluateRequest;
+use App\Http\Requests\TestExecution\TestExecutionIndexRequest;
+use App\Http\Requests\TestExecution\TestExecutionShowRequest;
+use App\Http\Requests\TestExecution\TestExecutionStartRequest;
+use App\Http\Requests\TestExecution\TestExecutionSubmitEvaluationRequest;
+use App\Http\Requests\TestExecution\TestExecutionSubmitRequest;
 use App\Models\Test\Test;
 use App\Models\Test\TestExecution;
 use App\Services\TestExecutionService;
 use App\Services\TestService;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use function redirect;
 use function view;
 
 class TestExecutionController extends AuthController
 {
 
-    public function index(Request $request)
+    /**
+     * @method GET
+     * @uri /testexecution/index
+     * @param TestExecutionIndexRequest $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function index(TestExecutionIndexRequest $request)
     {
         return view('test-execution.index');
     }
 
-    public function show(Request $request, $id)
+    /**
+     * @method GET
+     * @uri /testexecution/show/{id}
+     * @param TestExecutionShowRequest $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
+    public function show(TestExecutionShowRequest $request, $id)
     {
         $testExecution = TestExecution::findOrFail($id);
-        $canCurrentUserEvaluate = Auth::user()->is_admin
+        $canCurrentUserEvaluate = $request->currentUser->is_admin
             && TestService::doesTestHaveOpenQuestions($testExecution->test_id);
 
         return view('test-execution.show')
@@ -34,24 +51,24 @@ class TestExecutionController extends AuthController
     }
 
     /**
-     * @uri /tests/execute/{id}
+     * @uri /testexecution/start/{id}
      * @method GET
-     * @param Request $request
+     * @param TestExecutionStartRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function start(Request $request, $id)
+    public function start(TestExecutionStartRequest $request, $id)
     {
         date_default_timezone_set('Europe/Sofia');
-        $currentUser = Auth::user();
-        $testExecution = TestExecutionService::findTestExecutionInDb($currentUser->id, $id, true);
+        $currentUserId = $request->currentUser->id;
+        $testExecution = TestExecutionService::findTestExecutionInDb($currentUserId, $id, true);
         $testMaxDuration = Test::findOrFail($id)->max_duration * 60;
         $timeRemainingInSec = !$testExecution
             ? $testMaxDuration
             : ($testMaxDuration - Carbon::now()->diffInSeconds(Carbon::parse($testExecution->start_time)));
 
         if (!$testExecution) {
-            $testExecution = TestExecutionService::startTestExecution($currentUser->id, $id);
+            $testExecution = TestExecutionService::startTestExecution($currentUserId, $id);
         }
 
         return view('test-execution.execute')
@@ -63,12 +80,12 @@ class TestExecutionController extends AuthController
 
     /**
      * @method POST
-     * @uri /tests/execute/{id}
-     * @param Request $request
+     * @uri /testexecution/submit/{id}
+     * @param TestExecutionSubmitRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function finish(Request $request, $id)
+    public function submit(TestExecutionSubmitRequest $request, $id)
     {
         TestExecutionService::updateTestExecution(TestExecution::findOrFail($id));
 
@@ -77,12 +94,12 @@ class TestExecutionController extends AuthController
 
     /**
      * @method GET
-     * @uri /tests/execute/evaluate/{id}
-     * @param Request $request
+     * @uri /testexecution/evaluate/{id}
+     * @param TestExecutionEvaluateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function evaluate(Request $request, $id)
+    public function evaluate(TestExecutionEvaluateRequest $request, $id)
     {
         $testExecution = TestExecution::findOrFail($id);
 
@@ -92,15 +109,17 @@ class TestExecutionController extends AuthController
     }
 
     /**
-     * @param Request $request
+     * @method POST
+     * @uri /testexecution/evaluate/{id}
+     * @param TestExecutionSubmitEvaluationRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function submit(Request $request, $id)
+    public function submitEvaluation(TestExecutionSubmitEvaluationRequest $request, $id)
     {
         $testExecution = TestExecution::findOrFail($id);
         $testExecution->result_points += array_sum($request->points);
         $testExecution->save();
-        return redirect('/tests/execute/index');
+        return redirect('/testexecution/index');
     }
 }

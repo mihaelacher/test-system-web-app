@@ -2,7 +2,7 @@
 @section('content')
     <div class="container">
         @if($showEvaluateBtn)
-            <a class="btn btn-primary" href="/tests/execute/evaluate/{{ $testExecution->id }}">Evaluate</a>
+            <a class="btn btn-primary" href="/testexecution/evaluate/{{ $testExecution->id }}">Evaluate</a>
         @endif
         <h1>Test execution:</h1>
         <div>

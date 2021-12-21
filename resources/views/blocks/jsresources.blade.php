@@ -25,3 +25,7 @@
     <script src="http://test-system-web-app/js/users.js"></script>
 @endif
 
+@if (\Illuminate\Support\Facades\Request::is('testexecution/*'))
+    <script src="http://test-system-web-app/js/testexecution.js"></script>
+@endif
+

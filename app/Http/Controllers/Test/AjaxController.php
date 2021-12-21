@@ -6,13 +6,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Requests\Question\QuestionIndexRequest;
 use App\Http\Requests\Test\TestCreateRequest;
 use App\Http\Requests\Test\TestIndexRequest;
-use App\Http\Requests\TestExecution\TestExecutionSubmitAnswerRequest;
 use App\Models\Question\Question;
-use App\Models\Test\TestExecution;
-use App\Models\Test\TestExecutionAnswer;
-use App\Services\TestExecutionService;
 use App\Services\TestService;
-use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
 class AjaxController extends AuthController
@@ -91,82 +86,5 @@ class AjaxController extends AuthController
         }
 
         return $table->rawColumns(['title'])->make(true);
-    }
-
-    /**
-     * @method GET
-     * @uri /ajax/tests/getTestExecutions
-     * @param TestIndexRequest $request
-     * @return void
-     * @throws \Exception
-     */
-    public function getTestExecutionsDataTable(TestIndexRequest $request)
-    {
-        $currentUser = $request->currentUser;
-
-        $questionsQuery = TestExecutionService::getTestExecutionsIndexQueryBasedOnCurrentUser($currentUser)
-            ->select([
-                'test_executions.id', 'name', 'start_time', 'end_time', 'result_points'
-            ]);
-
-        $table = DataTables::of($questionsQuery)
-            ->editColumn('name', '<a href="/tests/execute/show/{{$id}}"> {{ $name }} </a>');
-
-        return $table->rawColumns(['name'])->make(true);
-    }
-
-    /**
-     * @method POST
-     * @uri /ajax/tests/execute/submitOpenQuestion/{testExecutionId}
-     * @param TestExecutionSubmitAnswerRequest $request
-     * @return int
-     */
-    public function submitOpenQuestion(TestExecutionSubmitAnswerRequest $request): int
-    {
-        $testExecutionId = $request->testExecutionId;
-        $questionId = $request->questionId;
-        $inputText = $request->inputValue;
-
-        $existingTestExecutionAnswer =
-            TestExecutionService::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId);
-
-        if ($existingTestExecutionAnswer) {
-            $existingTestExecutionAnswer->response_text_short = $inputText;
-            $existingTestExecutionAnswer->save();
-        } else {
-            TestExecutionService::insertTestExecutionAnswer($testExecutionId, $questionId, null, $inputText);
-        }
-        return 1;
-    }
-
-    /**
-     * @method POST
-     * @uri /ajax/tests/execute/submitQuestionAnswer/{testExecutionId}
-     * @param TestExecutionSubmitAnswerRequest $request
-     * @return int
-     */
-    public function submitQuestionAnswer(TestExecutionSubmitAnswerRequest $request): int
-    {
-        $testExecutionId = $request->testExecutionId;
-        $questionId = $request->questionId;
-        $answerId = $request->answerId;
-        $isChecked = $request->isChecked;
-
-        $existingTestExecutionAnswer =
-            TestExecutionService::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId, $answerId);
-
-        if ($existingTestExecutionAnswer && !$isChecked) {
-            $existingTestExecutionAnswer->delete();
-        } else if(
-            $isChecked
-            && is_null($existingTestExecutionAnswer)
-            && TestExecutionService::isMaxMarkableAnswersLimitExceeded($testExecutionId, $questionId)
-        ) {
-            return 0;
-        }
-        else if (is_null($existingTestExecutionAnswer)){
-            TestExecutionService::insertTestExecutionAnswer($testExecutionId, $questionId, $answerId);
-        }
-        return 1;
     }
 }
