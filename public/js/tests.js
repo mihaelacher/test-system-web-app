@@ -14,7 +14,11 @@ var test = {
                     data: 'max_duration',
                     name: 'max_duration'
                 }],
-                responsive: true
+                responsive: true,
+                bFilter: false,
+                lengthChange: false,
+                ordering: false,
+                info: false,
             });
         }
     },

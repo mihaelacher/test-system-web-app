@@ -1,7 +1,7 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'User'])
 @section('content')
     <div class="container">
-        <a class="btn btn-primary" href="/users/edit/{{ $user->id }}">Edit</a>
+        <a class="btn btn-success" href="/users/edit/{{ $user->id }}">Edit</a>
         <a class="btn btn-secondary" href="/users/changePassword/{{ $user->id }}">Change password</a>
         <h1>User:</h1>
         <div>

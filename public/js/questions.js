@@ -7,7 +7,11 @@ var question = {
                 ajax: '/ajax/questions/getQuestions',
                 columns: question.getQuestionDatatableCols(),
                 responsive: true,
-                select: isSelectable
+                select: isSelectable,
+                bFilter: false,
+                lengthChange: false,
+                ordering: false,
+                info: false,
             });
         }
     },

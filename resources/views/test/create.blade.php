@@ -1,8 +1,8 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Create Test'])
 @section('content')
     <form id="testForm" action="/tests/create" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-primary btn">Submit</button>
+        <button type="submit" class="btn-success btn">Submit</button>
         <div>
             <div class="form-group">
                 <label class="col-md-2 control-label">Name:</label>

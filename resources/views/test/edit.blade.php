@@ -1,10 +1,10 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Edit Test'])
 @section('content')
     <form id="testForm" action="/tests/update/{{ $test->id }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input id="js-test-id" type="hidden" value="{{ $test->id }}">
         <input id="js-is-edit" type="hidden" value="1">
-        <button type="submit" class="btn-primary btn">Submit</button>
+        <button type="submit" class="btn-success btn">Submit</button>
         <div>
             <div class="form-group">
                 <label class="col-md-2 control-label">Name:</label>

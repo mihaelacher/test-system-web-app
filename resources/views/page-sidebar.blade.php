@@ -6,43 +6,74 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
     <title>Test System Web App</title>
-    <!-- Core theme CSS (includes Bootstrap) TODO: not working must see WHY-->
-    <link href="http://test-system-web-app/css/app.css" rel="stylesheet" />
+    <!-- Favicons -->
+    <link href="{{ asset('assets/img/favicon.png')}}" rel="icon">
+    <link href="{{ asset('assets/img/apple-touch-icon.png')}}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{{ asset('assets/vendor/animate.css/animate.min.css')}}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css')}}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css')}}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css')}}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css')}}" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{{ asset('assets/css/style.css')}}" rel="stylesheet">
 </head>
 <body>
-<div class="d-flex" id="wrapper">
-    <!-- Sidebar-->
-    <div class="border-end bg-white" id="sidebar-wrapper">
-        <div class="sidebar-heading border-bottom bg-light">Test System Web App</div>
-        <div class="list-group list-group-flush">
-            @if(\Illuminate\Support\Facades\Auth::user()->is_admin)
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/questions/index">Questions</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/users/index">Users</a>
-            @endif
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/tests/index">Tests</a>
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/testexecution/index">Executed Tests</a>
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Profile</a>
+    <!-- ======= Header ======= -->
+    <header id="header" class="d-flex align-items-center">
+        <div class="container d-flex align-items-center">
+
+            <h1 class="logo me-auto"><a href="/">Home</a></h1>
+
+            <nav id="navbar" class="navbar">
+                <ul>
+                    @if(\Illuminate\Support\Facades\Auth::user()->is_admin)
+                        <li><a class="nav-link scrollto" href="/questions/index">QUESTIONS</a></li>
+                        <li><a class="nav-link scrollto" href="/users/index">USERS</a></li>
+                    @endif
+                    <li><a class="nav-link scrollto " href="/tests/index">TESTS</a></li>
+                    <li><a class="nav-link scrollto" href="/testexecution/index">EXECUTED TESTS</a></li>
+                    {{-- TODO <li><a class="nav-link scrollto" href="#contact">Profile</a></li>--}}
+                    <li><a class="getstarted scrollto" href="/auth/logout">LOGOUT</a></li>
+                </ul>
+                <i class="bi bi-list mobile-nav-toggle"></i>
+            </nav><!-- .navbar -->
+
         </div>
-    </div>
-    <!-- Page content wrapper-->
-    <div id="page-content-wrapper">
-        <!-- Top navigation-->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-            <div class="container-fluid">
-              {{--  <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>--}}
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                        <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/auth/logout">Logout</a></li>
-                    </ul>
+    </header>
+    <!-- End Header -->
+    @if(isset($title))
+        <main id="main">
+            <section id="about" class="about">
+                <div class="container">
+
+                    <div class="section-title">
+                        <h2>{{ $title }}</h2>
+                    </div>
+                    @yield('content')
                 </div>
-            </div>
-        </nav>
-        <!-- Page content-->
+            </section>
+        </main>
+    @else
         @yield('content')
-    </div>
-</div>
-@include('blocks.jsresources')
+    @endif
+
+    @include('blocks.jsresources')
+
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js')}}"></script>
+    <script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{{ asset('assets/js/main.js') }}"></script>
 </body>
 </html>

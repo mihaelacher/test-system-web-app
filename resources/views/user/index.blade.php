@@ -1,10 +1,7 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'All Users'])
 @section('content')
     <div class="portlet">
-        <a class="btn btn-primary" href="/users/create">Create new</a>
-        <div class="portlet-title">
-            <div class="caption">All users</div>
-        </div>
+        <a class="btn btn-success" href="/users/create">Create new</a>
 
         @include('user.index-table')
     </div>

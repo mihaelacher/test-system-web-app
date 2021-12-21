@@ -1,8 +1,8 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Evaluate Test'])
 @section('content')
     <form id="executionForm" action="/testexecution/evaluate/{{ $testExecutionId }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-primary btn">Submit</button>
+        <button type="submit" class="btn-success btn">Submit</button>
         <div class="container">
             @foreach($questions ?? [] as $index => $question)
                 <div>

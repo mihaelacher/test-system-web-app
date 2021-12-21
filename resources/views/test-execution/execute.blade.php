@@ -1,10 +1,10 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Execute Test'])
 @section('content')
     <form id="executionForm" action="/testexecution/submit/{{ $testExecutionId }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" value="{{ $timeRemainingInSec }}" id="timeRemainingInSec">
         <input type="hidden" value="{{ $testExecutionId }}" id="testExecutionId">
-        <button id="finishExecution" type="submit" class="btn-primary btn">Submit</button>
+        <button id="finishExecution" type="submit" class="btn-success btn">Submit</button>
         <div>
              Time remaining:<span class="big fw-bold" id="testCountDown">{{ $remainingTime }}</span>
         </div>

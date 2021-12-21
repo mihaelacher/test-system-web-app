@@ -19,7 +19,11 @@ var user = {
                     name: 'is_admin'
                 }],
                 responsive: true,
-                select: isSelectable
+                select: isSelectable,
+                bFilter: false,
+                lengthChange: false,
+                ordering: false,
+                info: false,
             });
         }
     },

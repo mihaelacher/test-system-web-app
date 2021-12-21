@@ -1,10 +1,9 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Test Execution'])
 @section('content')
     <div class="container">
         @if($showEvaluateBtn)
-            <a class="btn btn-primary" href="/testexecution/evaluate/{{ $testExecution->id }}">Evaluate</a>
+            <a class="btn btn-success" href="/testexecution/evaluate/{{ $testExecution->id }}">Evaluate</a>
         @endif
-        <h1>Test execution:</h1>
         <div>
             <label class="col-md-3 control-label left">Start time:</label>
             <div class="col-md-8">

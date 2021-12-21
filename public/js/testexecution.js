@@ -46,7 +46,11 @@ var testExecution = {
                     data: 'result_points',
                     name: 'result_points'
                 }],
-                responsive: true
+                responsive: true,
+                bFilter: false,
+                lengthChange: false,
+                ordering: false,
+                info: false,
             });
         }
     },

@@ -1,11 +1,7 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'All questions'])
 @section('content')
-<div class="portlet">
-    <a class="btn btn-primary" href="/questions/create">Create new</a>
-    <div class="portlet-title">
-        <div class="caption">All questions </div>
-    </div>
+        <a class="btn btn-success" href="/questions/create">Create new</a>
 
-   @include('question.index-table')
-</div>
+    @include('question.index-table')
+
 @endsection

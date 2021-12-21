@@ -1,8 +1,8 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Edit User'])
 @section('content')
     <form id="testForm" action="/users/update/{{ $user->id }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-primary btn">Submit</button>
+        <button type="submit" class="btn-success btn">Submit</button>
         <div>
             <div class="form-group">
                 <label class="col-md-2 control-label">First name:</label>

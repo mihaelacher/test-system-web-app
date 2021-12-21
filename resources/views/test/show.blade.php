@@ -1,12 +1,12 @@
-@extends('page-sidebar')
+@extends('page-sidebar', ['title' => 'Test'])
 @section('content')
     <div class="container">
         <input id="js-test-id" type="hidden" value="{{ $test->id }}">
         @if($currentUser->is_admin)
-            <a class="btn btn-primary" href="/tests/edit/{{ $test->id }}">Edit</a>
+            <a class="btn btn-success" href="/tests/edit/{{ $test->id }}">Edit</a>
             <a class="btn btn-secondary" href="/tests/inviteUsers/{{ $test->id }}">Invite users to participate</a>
         @elseif($showStartBtn)
-            <a class="btn btn-primary" href="/testexecution/start/{{ $test->id }}">Start</a>
+            <a class="btn btn-success" href="/testexecution/start/{{ $test->id }}">Start</a>
         @endif
         <h1>Test:</h1>
         <div>
