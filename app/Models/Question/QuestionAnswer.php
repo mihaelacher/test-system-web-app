@@ -24,7 +24,5 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class QuestionAnswer extends MainModel
 {
-    use SoftDeletes;
-
     protected $table = 'question_answers';
 }

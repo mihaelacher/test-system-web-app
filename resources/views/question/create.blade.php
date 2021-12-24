@@ -1,131 +1,42 @@
 @extends('page-sidebar', ['title' => 'Create Question'])
 @section('content')
-    <form id="questionForm" action="/questions/create" method="post">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-success btn">Submit</button>
-    <div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Text:</label>
-            <div class="col-md-9">
-                <input type="text" class="form-control placeholder-no-fix" placeholder="Text" autocomplete="off" name="text"/>
+    @php
+        $multipleChoiceType = \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
+    @endphp
+    <input id="js-single-choice-type" type="hidden" value="{{ \App\Models\Question\QuestionType::SINGLE_CHOICE }}">
+    <input id="js-multiple-choice-type" type="hidden" value="{{ $multipleChoiceType }}">
+    <div class="form-container">
+        <form id="questionForm" action="/questions/store" method="post" role="form">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
+            <div class="row">
+                <div class="form-group mt-3">
+                    <label class="label-text" for="text">TEXT</label>
+                    <input type="text" name="text" class="form-control" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="instruction">INSTRUCTION</label>
+                    <textarea class="form-control" name="instruction" rows="3"></textarea>
+                </div>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="points">POINTS</label>
+                    <input type="number" class="form-control" name="points" >
+                </div>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="type">TYPE</label>
+                    <select id="js-question-type" class="form-control" name="type">
+                        @foreach($questionTypes as $type)
+                            <option value="{{ $type->id }}"> {{ $type->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mt-3 hidden js-max-markable-answers">
+                    <label class="label-text" for="max_markable_answers">MAX MARKABLE ANSWERS</label>
+                    <input type="number" class="form-control" name="max_markable_answers">
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Instruction:</label>
-            <div class="col-md-9">
-                <input type="text" class="form-control placeholder-no-fix" placeholder="Instruction" autocomplete="off" name="instruction"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Points:</label>
-            <div class="col-md-9">
-                <input class="form-control placeholder-no-fix" placeholder="Points" autocomplete="off" name="points"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Type:</label>
-            <div class="col-md-9">
-               <select class="form-control" name="type">
-                   @foreach($questionTypes as $type)
-                        <option value="{{ $type->id }}"> {{ $type->name }} </option>
-                   @endforeach
-               </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Max markable answers:</label>
-            <div class="col-md-9">
-                <input type="number" class="form-control placeholder-no-fix"
-                       placeholder="Max markable answers" autocomplete="off" name="max_markable_answers"/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-2 control-label">Is question open:</label>
-            <div class="col-md-9">
-                <select class="form-control" name="is_open" id="isQuestionOpen">
-                    <option value="0"> No </option>
-                    <option value="1" selected> Yes </option>
-                </select>
-            </div>
-        </div>
+            @include('question.blocks.answer-container', ['answer' => null, 'questionType' => null, 'hide' => false])
+        </form>
+        <button id="js-clone-answer-container-btn" class="btn btn-success">Add Answer</button>
     </div>
-    <div id="answersForm" class="hidden">
-        <div class="col-md-12 mt-5">
-            <div class="form-group mt-5">
-                <input class="col-md-1 isCorrectSelect" type="checkbox">
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer number:</label>
-                <div class="col-md-2">
-                    <input type="number" min="0" class="form-control"
-                           placeholder="Question number" autocomplete="off" name="order_num[]"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer:</label>
-                <div class="col-md-5">
-                    <input type="text" class="form-control"
-                           placeholder="Answer" autocomplete="off" name="value[]"/>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12 mt-5 questionAnswerForm">
-            <div class="form-group mt-5">
-                <input class="col-md-1 isCorrectSelect" type="checkbox">
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer number:</label>
-                <div class="col-md-2">
-                    <input type="number" min="0" class="form-control"
-                           placeholder="Question number" autocomplete="off" name="order_num[]"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer:</label>
-                <div class="col-md-5">
-                    <input type="text" class="form-control"
-                           placeholder="Answer" autocomplete="off" name="value[]"/>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12 mt-5 questionAnswerForm">
-            <div class="form-group mt-5">
-                <input class="col-md-1 isCorrectSelect" type="checkbox">
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer number:</label>
-                <div class="col-md-2">
-                    <input type="number" min="0" class="form-control"
-                           placeholder="Question number" autocomplete="off" name="order_num[]"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer:</label>
-                <div class="col-md-5">
-                    <input type="text" class="form-control"
-                           placeholder="Answer" autocomplete="off" name="value[]"/>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12 mt-5 questionAnswerForm">
-            <div class="form-group mt-5">
-                <input class="col-md-1 isCorrectSelect" type="checkbox">
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer number:</label>
-                <div class="col-md-2">
-                    <input type="number" min="0" class="form-control"
-                           placeholder="Question number" autocomplete="off" name="order_num[]"/>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-1">Answer:</label>
-                <div class="col-md-5">
-                    <input type="text" class="form-control"
-                           placeholder="Answer" autocomplete="off" name="value[]"/>
-                </div>
-            </div>
-        </div>
-    </div>
-    </form>
 @endsection

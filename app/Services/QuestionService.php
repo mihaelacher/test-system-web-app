@@ -2,61 +2,105 @@
 
 namespace App\Services;
 
+use App\Http\Requests\MainFormRequest;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionAnswer;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\Question\QuestionType;
+use App\Models\Test\TestExecution;
+use App\Models\Test\TestQuestions;
 
 class QuestionService
 {
     /**
+     * @param MainFormRequest $request
+     * @param int|null $questionId
+     * @return void
+     */
+    public static function handleQuestionOperations(MainFormRequest $request, ?int $questionId = null)
+    {
+        $question = $questionId ?? new Question();
+        $questionTypeId = $request->type;
+
+        self::deleteQuestionAnswers($questionId);
+
+        $questionId = QuestionService::setQuestionAttributes($question, $request->text, $request->instruction,
+            $request->points, $questionTypeId, $request->max_markable_answers);
+
+        if (QuestionService::isQuestionClosed($questionTypeId)) {
+            QuestionService::storeQuestionAnswers($request->value, $request->is_correct, $questionId);
+        }
+    }
+
+    /**
+     * @param int $questionTypeId
+     * @return bool
+     */
+    public static function isQuestionClosed(int $questionTypeId): bool
+    {
+        return in_array($questionTypeId, QuestionType::CLOSED_QUESTIONS);
+    }
+
+    /**
+     * @param int $questionId
+     * @return mixed
+     */
+    public static function belongsQuestionToTestExecution(int $questionId)
+    {
+        return TestExecution::join('tests as t', 't.id', '=', 'test_executions.test_id')
+            ->join('test_questions as tq', 'tq.test_id', '=', 't.id')
+            ->where('tq.question_id', '=', $questionId)
+            ->exists();
+    }
+
+    /**
+     * @param int $questionId
+     * @return void
+     */
+    public static function destroyQuestion(int $questionId)
+    {
+        self::deleteQuestionAnswers($questionId);
+        TestQuestions::where('question_id', '=', $questionId)->delete();
+        Question::find($questionId)->delete();
+    }
+
+    /**
+     * @param Question $question
      * @param string $text
      * @param string $instruction
      * @param float $points
      * @param int $typeId
      * @param int $maxMarkableAnswers
-     * @param int $isOpen
-     * @param int $currentUserId
      * @return int
      */
-    public static function storeQuestion(string $text, string $instruction, float $points, int $typeId,
-                                         int $maxMarkableAnswers, int $isOpen, int $currentUserId): int
+    private static function setQuestionAttributes(Question $question, string $text, string $instruction, float $points,
+                                         int $typeId, int $maxMarkableAnswers): int
     {
-        $question = new Question();
         $question->text = $text;
         $question->instruction = $instruction;
         $question->points = $points;
         $question->question_type_id = $typeId;
-        $question->max_markable_answers = $maxMarkableAnswers;
-        $question->is_open = $isOpen;
-        $question->created_by = $currentUserId;
+        $question->max_markable_answers = $typeId === QuestionType::MULTIPLE_CHOICE ? $maxMarkableAnswers : 1;
         $question->save();
 
         return $question->id;
     }
 
     /**
-     * @param array $answerOrderNum
      * @param array $answerValues
      * @param array $answerIsCorrect
-     * @param int $currentUserId
      * @param int $questionId
      * @return void
      */
-    public static function storeQuestionAnswers(array $answerOrderNum, array $answerValues, array $answerIsCorrect,
-                                                int $currentUserId, int $questionId): void
+    private static function storeQuestionAnswers(array $answerValues, array $answerIsCorrect, int $questionId): void
     {
         $rowsForInsert = [];
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < count($answerValues); $i++) {
             $rowsForInsert[] = [
-                'order_num' => $answerOrderNum[$i],
+                'order_num' => $i + 1,
                 'value' => $answerValues[$i],
                 'is_correct' => $answerIsCorrect[$i],
-                'question_id' => $questionId,
-                'created_by' => $currentUserId
+                'question_id' => $questionId
             ];
         }
 
@@ -64,52 +108,13 @@ class QuestionService
     }
 
     /**
-     * @param Question $question
-     * @param Request $request
+     * @param int|null $questionId
      * @return void
      */
-    public static function updateQuestion(Question $question, Request $request)
+    private static function deleteQuestionAnswers(?int $questionId)
     {
-        $question->text = $request->text;
-        $question->instruction = $request->instruction;
-        $question->points = $request->points;
-        $question->question_type_id = $request->type;
-        $question->max_markable_answers = $request->max_markable_answers;
-        $question->is_open = $request->is_open;
-        $question->save();
-    }
-
-    /**
-     * @param array $answerIds
-     * @param array $answerOrderNum
-     * @param array $answerValues
-     * @param array $answerIsCorrect
-     * @return void
-     */
-    public static function updateQuestionAnswers(array $answerIds, array $answerOrderNum, array $answerValues, array $answerIsCorrect)
-    {
-        foreach ($answerIds as $index => $id) {
-            $answer = QuestionAnswer::findOrFail($id);
-            $answer->order_num = $answerOrderNum[$index];
-            $answer->value = $answerValues[$index];
-            $answer->is_correct = $answerIsCorrect[$index];
-            $answer->save();
+        if ($questionId) {
+            QuestionAnswer::where('question_id', '=', $questionId)->delete();
         }
-    }
-
-    /**
-     * @param int $questionId
-     * @return mixed
-     */
-    public static function getQuestionShowData(int $questionId)
-    {
-        return Question::join('question_types as qt',
-            'qt.id', '=', 'questions.question_type_id')
-            ->where('questions.id', '=', $questionId)
-            ->select([
-                'questions.*',
-                'qt.name as type',
-            ])
-            ->first();
     }
 }

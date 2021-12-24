@@ -19,14 +19,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $is_open
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property Carbon $deleted_at
  * @property int $created_by
  * @property int $updated_by
  */
 class Question extends MainModel
 {
-    use SoftDeletes;
-
     protected $table = 'questions';
 
     /**
@@ -35,5 +32,13 @@ class Question extends MainModel
     public function answers(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany('App\Models\Question\QuestionAnswer', 'question_id', 'id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function type(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne('App\Models\Question\QuestionType', 'id', 'question_type_id');
     }
 }

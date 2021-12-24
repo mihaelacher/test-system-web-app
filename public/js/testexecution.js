@@ -49,7 +49,6 @@ var testExecution = {
                 responsive: true,
                 bFilter: false,
                 lengthChange: false,
-                ordering: false,
                 info: false,
             });
         }

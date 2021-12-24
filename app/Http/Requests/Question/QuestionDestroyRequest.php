@@ -5,7 +5,7 @@ namespace App\Http\Requests\Question;
 use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainFormRequest;
 
-class QuestionUpdateRequest extends MainFormRequest
+class QuestionDestroyRequest extends MainFormRequest
 {
     use AuthorizeAdminRequestTrait {
         authorize as authorizeAdmin;

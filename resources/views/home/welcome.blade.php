@@ -41,7 +41,7 @@
     </div>
 </section><!-- End Hero -->
 
- {{--   <!-- ======= Featured Services Section ======= -->
+    <!-- ======= Featured Services Section ======= -->
     <section id="featured-services" class="featured-services section-bg">
         <div class="container">
 
@@ -472,7 +472,6 @@
 
                 <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
                     <div class="member">
-                        <img src="assets/img/team/team-2.jpg" alt="">
                         <h4>Sarah Jhinson</h4>
                         <span>Product Manager</span>
                         <p>
@@ -489,7 +488,6 @@
 
                 <div class="col-lg-4 col-md-6 d-flex align-items-stretch">
                     <div class="member">
-                        <img src="assets/img/team/team-3.jpg" alt="">
                         <h4>William Anderson</h4>
                         <span>CTO</span>
                         <p>
@@ -579,6 +577,6 @@
         </div>
     </section><!-- End Contact Section -->
 
-</main><!-- End #main -->--}}
+</main><!-- End #main -->
 
 @endsection
