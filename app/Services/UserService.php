@@ -11,13 +11,13 @@ class UserService
      * @param User $user
      * @param string $firstName
      * @param string $lastName
-     * @param string $username
+     * @param string|null $username
      * @param string $email
      * @param int $isAdmin
      * @return void
      */
-    public static function updateUser(User $user, string $firstName, string $lastName,
-                                      string $username, string $email, int $isAdmin)
+    public static function setUserAttributes(User $user, string $firstName, string $lastName, string $email,
+                                             int $isAdmin, ?string $username = null)
     {
         $user->first_name = $firstName;
         $user->last_name = $lastName;

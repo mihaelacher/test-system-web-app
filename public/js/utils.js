@@ -5,6 +5,7 @@
             this.methodLinks = $('a[data-method]');
             this.token = $('a[data-token]');
             this.registerEvents();
+            this.onPageLoadShowToastrSessionMsg();
         },
 
         registerEvents: function() {
@@ -62,6 +63,61 @@
 
             return form.append(token, hiddenInput)
                 .appendTo('body');
+        },
+        onPageLoadShowToastrSessionMsg: function () {
+            let msgBox = $('.alert.show-toastr');
+            let text = '';
+            if (msgBox.length) {
+                text = msgBox[0].textContent;
+            }
+
+            // Sanity check
+            if (msgBox.is(':visible') || text === undefined || text === '') {
+                return;
+            }
+
+            // if toastr library is not loaded, then show the error message box
+            if (typeof toastr === undefined) {
+                msgBox.show();
+                msgBox.removeClass('hidden');
+                return;
+            }
+
+            text = text.trim();
+
+            let msgType = msgBox.hasClass('alert-danger') ? 'error' : 'success';
+
+            utils.showToastrMessage(text, msgType, 4000);
+        },
+        showToastrMessage: function (msg, type, timeOut) {
+            timeOut = timeOut !== undefined ? timeOut : 2000;
+
+            toastr.options = {
+                classButton: true,
+                debug: false,
+                positionClass: 'toast-top-right',
+                onclick: null,
+                showDuration: '500',
+                hideDuration: '500',
+                timeOut: timeOut,
+                extendedTimeOut: '3000',
+                showEasing: 'swing',
+                hideEasing: 'linear',
+                showMethod: 'fadeIn',
+                hideMethod: 'fadeOut'
+            }
+
+            type = String(type);
+
+            if (type === 'warning') {
+                toastr.warning(msg);
+            } else if (type === 'error') {
+                toastr.error(msg);
+            } else if (type === 'info') {
+                toast.info(msg);
+            } else {
+                toastr.success(msg);
+            }
         }
     };
 
@@ -91,7 +147,6 @@
             heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "' class='active'></li>":
             heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "'></li>"
     });
-
 
     utils.initialize();
 

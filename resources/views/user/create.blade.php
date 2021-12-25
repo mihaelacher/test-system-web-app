@@ -1,46 +1,34 @@
-@extends('page-sidebar', ['title' => 'Create User'])
-@section('content')
-    <form id="testForm" action="/users/create" method="post">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-success btn">Submit</button>
-        <div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">First name:</label>
-                <div class="col-md-9">
-                    <input type="text" class="form-control placeholder-no-fix" placeholder="First name"
-                           autocomplete="off" name="first_name"/>
+@extends('content', ['title' => 'Create User'])
+@section('sub-content')
+    <div class="form-container">
+        <form id="usersForm" action="/users/store" method="post" role="form" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
+            <div class="row">
+                <div class="form-group mt-3">
+                    <label class="label-text" for="first_name">FIRST NAME</label>
+                    <input type="text" name="first_name" class="form-control" required>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Last name:</label>
-                <div class="col-md-9">
-                    <input type="text" class="form-control placeholder-no-fix" placeholder="Last name"
-                           autocomplete="off" name="last_name"/>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="last_name">LAST NAME</label>
+                    <input type="text" name="last_name" class="form-control" required>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Username:</label>
-                <div class="col-md-9">
-                    <input type="text" class="form-control placeholder-no-fix" placeholder="Username"
-                           autocomplete="off" name="username"/>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="username">USERNAME</label>
+                    <input type="text" class="form-control" name="username" >
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Email:</label>
-                <div class="col-md-9">
-                    <input type="text" class="form-control placeholder-no-fix" placeholder="Email"
-                           autocomplete="off" name="email"/>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="email">EMAIL</label>
+                    <input type="text" class="form-control" name="email" >
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">Admin:</label>
-                <div class="col-md-9">
+                <div class="form-group mt-3">
+                    <label class="label-text" for="is_admin">IS ADMIN</label>
                     <select class="form-control" name="is_admin">
-                        <option value="0" selected> No </option>
-                        <option value="1"> Yes </option>
+                        <option value="0">NO</option>
+                        <option value="1">YES</option>
                     </select>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 @endsection

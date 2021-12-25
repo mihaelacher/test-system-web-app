@@ -1,55 +1,29 @@
-@extends('page-sidebar', ['title' => 'User'])
-@section('content')
-    <div class="container">
-        <a class="btn btn-success" href="/users/edit/{{ $user->id }}">Edit</a>
-        <a class="btn btn-secondary" href="/users/changePassword/{{ $user->id }}">Change password</a>
-        <h1>User:</h1>
-        <div>
-            <label class="col-md-3 control-label left">First name:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $user->first_name }}
-                </p>
+@extends('content', ['title' => 'User'])
+@section('sub-content')
+    <div class="form-container">
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <a class="btn btn-success" href="/users/{{ $user->id }}/edit">EDIT</a>
+        <a class="btn btn-secondary" href="/users/{{ $user->id }}/changePassword">CHANGE PASSWORD</a>
+        <div class="row">
+            <div class="form-group mt-3">
+                <label class="label-text" for="first_name">FIRST NAME</label>
+                <p>{{ $user->first_name }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Last name:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $user->last_name }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="last_name">LAST NAME</label>
+                <p>{{ $user->last_name }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Username:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $user->username }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="username">USERNAME</label>
+                <p>{{ $user->username }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Email:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $user->email }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="email">EMAIL</label>
+                <p>{{ $user->email }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Admin:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $user->is_admin ? "Yes" : "No" }}
-                </p>
-            </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Creation:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ \Carbon\Carbon::parse($user->created_at)->format('d.m.Y H:i:s') }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="is_admin">IS ADMIN</label>
+                <p>{{ $user->is_admin ? "Yes" : "No" }}</p>
             </div>
         </div>
     </div>

@@ -39,6 +39,6 @@
                 </div>
             </div>
         </div>
-        @include('user.index-table')
+        @include('user.blocks.index-table')
     </form>
 @endsection

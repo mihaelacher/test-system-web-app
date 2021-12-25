@@ -1,5 +1,5 @@
-@extends('page-sidebar', ['title' => 'Question'])
-@section('content')
+@extends('content', ['title' => 'Question'])
+@section('sub-content')
     @php
         $isMultipleChoiceQuestion = $question->question_type_id === \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
         $isSingleChoiceQuestion = $question->question_type_id === \App\Models\Question\QuestionType::SINGLE_CHOICE;

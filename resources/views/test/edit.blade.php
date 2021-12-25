@@ -42,7 +42,7 @@
         </div>
         @if($hasQuestions)
             <div id="questionsTable" class="col-md-12 mt-5">
-                @include('question.index-table', ['tableId' => 'testQuestionsIndexTable'])
+                @include('question.blocks.index-table', ['tableId' => 'testQuestionsIndexTable'])
             </div>
         @endif
     </form>

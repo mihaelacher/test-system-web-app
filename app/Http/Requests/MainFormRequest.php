@@ -17,6 +17,7 @@ abstract class MainFormRequest extends FormRequest
     {
         parent::__construct();
         $this->currentUser = Auth::user();
+        $this->extendValidatorRules();
     }
 
     // remove javascript -- tags XSS defense
@@ -28,5 +29,10 @@ abstract class MainFormRequest extends FormRequest
     public function rules()
     {
         return [];
+    }
+
+    public function extendValidatorRules()
+    {
+
     }
 }

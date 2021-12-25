@@ -7,10 +7,12 @@ use App\Http\Requests\User\UserCreateRequest;
 use App\Http\Requests\User\UserEditRequest;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserShowRequest;
+use App\Http\Requests\User\UserStorePasswordRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\Authorization\User;
 use App\Services\UserService;
+use App\Util\MessageUtil;
 
 class UserController extends AuthController
 {
@@ -40,7 +42,7 @@ class UserController extends AuthController
 
     /**
      * @method GET
-     * @uri users/edit/{id}
+     * @uri users/{id}/edit
      * @param UserEditRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
@@ -53,15 +55,17 @@ class UserController extends AuthController
 
     /**
      * @method POST
-     * @uri /users/update/{id}
+     * @uri /users/{id}/update
      * @param UserUpdateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function update(UserUpdateRequest $request, $id)
     {
-        UserService::updateUser(User::findOrFail($id), $request->first_name, $request->last_name, $request->username,
-            $request->email, $request->is_admin);
+        UserService::setUserAttributes(User::findOrFail($id), $request->first_name, $request->last_name,
+            $request->email, $request->is_admin, $request->username);
+
+        MessageUtil::success('You have successfully updated the user!');
 
         return redirect('users/' . $id);
     }
@@ -78,21 +82,23 @@ class UserController extends AuthController
     }
 
     /**
-     * @uri /users/create
+     * @uri /users/store
      * @method POST
      * @param UserStoreRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function store(UserStoreRequest $request)
     {
-        UserService::updateUser(new User(), $request->first_name, $request->last_name, $request->username,
-            $request->email, $request->is_admin);
+        UserService::setUserAttributes(new User(), $request->first_name, $request->last_name,
+            $request->email, $request->is_admin, $request->username);
+
+        MessageUtil::success('You have successfully created the user!');
 
         return redirect('/users/index');
     }
 
     /**
-     * @uri /users/changePassword/{id}
+     * @uri /users/{id}/changePassword
      * @method GET
      * @param UserEditRequest $request
      * @param $id
@@ -106,14 +112,16 @@ class UserController extends AuthController
 
     /**
      * @method POST
-     * @uri /users/changePassword/{id}
-     * @param UserStoreRequest $request
+     * @uri /users/{id}/storePassword
+     * @param UserStorePasswordRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function storePassword(UserStoreRequest $request, $id)
+    public function storePassword(UserStorePasswordRequest $request, $id)
     {
         UserService::changeUserPassword(User::findOrFail($id), $request->password);
+
+        MessageUtil::success('You have successfully changed the user\'s password!');
         return redirect('/users/index');
     }
 }

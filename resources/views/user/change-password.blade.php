@@ -1,16 +1,19 @@
-@extends('page-sidebar', ['title' => 'Change User Password'])
-@section('content')
-    <form id="testForm" action="/users/changePassword/{{ $userId }}" method="post">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn-success btn">Submit</button>
-        <div>
-            <div class="form-group">
-                <label class="col-md-2 control-label">New password:</label>
-                <div class="col-md-9">
-                    <input type="text" class="form-control placeholder-no-fix" placeholder="Password"
-                           autocomplete="off" name="password"/>
+@extends('content', ['title' => 'Change User Password'])
+@section('sub-content')
+    <div class="form-container">
+        <form id="changePasswordForm" action="/users/{{ $userId }}/storePassword" method="post" role="form" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
+            <div class="row">
+                <div class="form-group mt-3">
+                    <label class="label-text" for="password">NEW PASSWORD</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label class="label-text" for="password_confirmation">CONFIRM PASSWORD</label>
+                    <input type="password" name="password_confirmation" class="form-control" required>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 @endsection

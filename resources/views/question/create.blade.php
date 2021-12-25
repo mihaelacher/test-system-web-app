@@ -1,5 +1,5 @@
-@extends('page-sidebar', ['title' => 'Create Question'])
-@section('content')
+@extends('content', ['title' => 'Create Question'])
+@section('sub-content')
     @php
         $multipleChoiceType = \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
     @endphp

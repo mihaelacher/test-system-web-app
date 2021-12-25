@@ -48,21 +48,7 @@
         </div>
     </header>
     <!-- End Header -->
-    @if(isset($title))
-        <main id="main">
-            <section id="about" class="about">
-                <div class="container">
-
-                    <div class="section-title">
-                        <h2>{{ $title }}</h2>
-                    </div>
-                    @yield('content')
-                </div>
-            </section>
-        </main>
-    @else
-        @yield('content')
-    @endif
+    @yield('content')
 
     @include('blocks.jsresources')
 

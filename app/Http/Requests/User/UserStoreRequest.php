@@ -7,5 +7,5 @@ use App\Http\Requests\MainFormRequest;
 
 class UserStoreRequest extends MainFormRequest
 {
-    use AuthorizeAdminRequestTrait;
+    use AuthorizeAdminRequestTrait, ValidateUserRequestTrait;
 }

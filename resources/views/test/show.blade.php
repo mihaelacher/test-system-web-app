@@ -35,7 +35,7 @@
         </div>
         @if($hasQuestions && $currentUser->is_admin)
             <div class="col-md-12 mt-5">
-                @include('question.index-table', ['tableId' => 'testQuestionsIndexTable'])
+                @include('question.blocks.index-table', ['tableId' => 'testQuestionsIndexTable'])
             </div>
         @endif
     </div>
