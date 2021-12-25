@@ -6,7 +6,7 @@
     <input id="js-single-choice-type" type="hidden" value="{{ \App\Models\Question\QuestionType::SINGLE_CHOICE }}">
     <input id="js-multiple-choice-type" type="hidden" value="{{ $multipleChoiceType }}">
     <div class="form-container">
-        <form id="questionForm" action="/questions/store" method="post" role="form">
+        <form id="questionForm" action="/questions/store" method="post" role="form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
             <div class="row">

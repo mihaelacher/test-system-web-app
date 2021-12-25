@@ -1,6 +1,9 @@
-var question = {
+const singleChoiceType = $('#js-single-choice-type').val(),
+    multipleChoiceType = $('#js-multiple-choice-type').val();
+
+let question = {
     loadQuestions: function (isSelectable = false) {
-        var questionsTable = $('#questionsIndexTable');
+        let questionsTable = $('#questionsIndexTable');
 
         if (questionsTable.length) {
             questionsTable.DataTable({
@@ -44,14 +47,12 @@ var question = {
 
     attachIsQuestionOpenHandler: function () {
         $('#js-question-type').on('change', function () {
-            var selection = $(this).val();
-            var answerContainer = $('.js-answer-container, #js-clone-answer-container-btn');
-            var singleChoiceType = $('#js-single-choice-type').val();
-            var multipleChoiceType = $('#js-multiple-choice-type').val();
-            var maxMarkableAnswersInput = $('.js-max-markable-answers');
+            let selection = $(this).val();
+            let answerContainer = $('.js-answer-container, #js-clone-answer-container-btn');
+            let maxMarkableAnswersInput = $('.js-max-markable-answers');
 
             if (selection === singleChoiceType || selection === multipleChoiceType) {
-                var inputType = 'checkbox';
+                let inputType = 'checkbox';
 
                 if (selection === singleChoiceType) {
                     inputType = 'radio';
@@ -70,9 +71,9 @@ var question = {
     },
 
     attachOnSubmitHandler: function () {
-        var form = $('#questionForm');
+        let form = $('#questionForm');
         form.on('submit', function () {
-            var selector = $('.js-correct-answer');
+            let selector = $('.js-correct-answer');
 
             if (selector.length) {
                 $.each(selector, function (i, el) {
@@ -86,12 +87,15 @@ var question = {
     },
 
     attachCloneAnswerContainerHandler: function () {
-        var cloneBtn = $('#js-clone-answer-container-btn');
+        let cloneBtn = $('#js-clone-answer-container-btn');
+        let answerContainerSelector = '.js-answer-container';
 
         if (cloneBtn.length) {
+            let answerContainer = $(answerContainerSelector);
+
             cloneBtn.on('click', function () {
-                var container = $('.js-answer-container').last();
-                var clone = container.clone();
+                let container =answerContainer.last();
+                let clone = container.clone();
 
                 clone.find('input[type=checkbox]').prop('checked', false);
                 clone.find('input').val('');
@@ -99,13 +103,15 @@ var question = {
 
                 question.attachRemoveAnswerContainerHandler(clone.find('.js-remove-answer-container-btn'));
                 question.disableEnableRemoveContainerBtn();
+                question.changeMaxMarkableAnswersRule($(answerContainerSelector).length);
             });
         }
+
     },
 
     attachRemoveAnswerContainerHandler: function (removeBtn) {
         removeBtn = removeBtn ?? $('.js-remove-answer-container-btn');
-        var answerContainerSelector = '.js-answer-container';
+        let answerContainerSelector = '.js-answer-container';
 
         removeBtn.on('click', function () {
             if ($(answerContainerSelector).length > 1) {
@@ -113,11 +119,13 @@ var question = {
             }
 
             question.disableEnableRemoveContainerBtn();
+            console.log($(answerContainerSelector).length)
+            question.changeMaxMarkableAnswersRule($(answerContainerSelector).length);
         });
     },
 
     disableEnableRemoveContainerBtn: function () {
-        var disable = false;
+        let disable = false;
 
         if ($('.js-answer-container').length === 1) {
             disable = true;
@@ -127,15 +135,49 @@ var question = {
     },
 
     attachQuestionFormValidator: function () {
-        $('#questionForm .btnSubmitForm').on('click', function () {
            let rules = {
                'text': {required: true},
-               'points': {required: true}
+               'points': {required: true, number: true},
+               'value[]': {
+                   required: {
+                       depends: function () {
+                           let questionType =  $('#js-question-type').val();
+
+                           return questionType === multipleChoiceType
+                           || questionType === singleChoiceType
+                       }
+                   }
+               },
+               'max_markable_answers': {
+                   required: {
+                       depends:  function (element) {
+                           return $('#js-question-type').val() === multipleChoiceType;
+                       }
+                   },
+                   min: 2,
+                   max: $('.js-answer-container').length - 1
+               }
            }
-           validator.addFormValidationHandler('questionForm', rules);
-        });
+
+           let messages = {
+               'text': 'Please, specify question text!',
+               'points': 'Please, specify question points!',
+               'value[]': 'Please, insert answers to the question!',
+               'max_markable_answers': {
+                   required: 'Please, specify max markable answers!',
+                   min: 'Should be more than 1 for multiple choice question!',
+                   max: 'Either add more answers or change max markable answers, please!'
+               }
+           }
+
+           validator.addFormValidationHandler('questionForm', rules, messages);
     },
 
+    changeMaxMarkableAnswersRule: function (max) {
+        $('input[name="max_markable_answers"]').rules('remove', 'max');
+        $('input[name="max_markable_answers"]').rules('add', {max: max});
+    //    $.validator.element('input[name="max_markable_answers"]');
+    },
     init:function () {
        this.loadQuestions();
        this.attachIsQuestionOpenHandler();
