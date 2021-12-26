@@ -13,6 +13,7 @@ use App\Http\Requests\Question\QuestionUpdateRequest;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionType;
 use App\Services\QuestionService;
+use App\Util\MessageUtil;
 
 class QuestionController extends AuthController
 {
@@ -66,6 +67,9 @@ class QuestionController extends AuthController
     public function store(QuestionStoreRequest $request)
     {
         QuestionService::handleQuestionOperations($request);
+
+        MessageUtil::success('You have successfully created the question!');
+
         return redirect('/questions/index');
     }
 
@@ -94,6 +98,9 @@ class QuestionController extends AuthController
     public function update(QuestionUpdateRequest $request, $id)
     {
         QuestionService::handleQuestionOperations($request, $id);
+
+        MessageUtil::success('You have successfully updated the question!');
+
         return redirect('/questions/' . $id);
     }
 
@@ -107,6 +114,9 @@ class QuestionController extends AuthController
     public function delete(QuestionDestroyRequest $request, $id)
     {
         QuestionService::destroyQuestion($id);
+
+        MessageUtil::success('You have successfully deleted the question!');
+
         return redirect('/questions/index');
     }
 }

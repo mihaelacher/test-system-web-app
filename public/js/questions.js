@@ -9,8 +9,7 @@ let question = {
             questionsTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
                     ajax: '/ajax/questions/getQuestions',
-                    columns: utils.getQuestionDatatableCols(),
-                    select: isSelectable
+                    columns: utils.getQuestionDatatableCols()
                 }
             });
         }
@@ -41,20 +40,19 @@ let question = {
         });
     },
 
-    attachOnSubmitHandler: function () {
-        let form = $('#questionForm');
-        form.on('submit', function () {
-            let selector = $('.js-correct-answer');
+    questionFormSubmitHandler: function (form, event) {
+        let selector = $('.js-correct-answer');
+        // todo create submit handler
+        if (selector.length) {
+            $.each(selector, function (i, el) {
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', 'is_correct[]')
+                    .attr('value', $(el).is(':checked') ? 1 : 0)
+                    .appendTo(form);
+            });
+        }
 
-            if (selector.length) {
-                $.each(selector, function (i, el) {
-                    $('<input />').attr('type', 'hidden')
-                        .attr('name', 'is_correct[]')
-                        .attr('value', $(el).is(':checked') ? 1 : 0)
-                        .appendTo(form);
-                });
-            }
-        });
+        form.submit();
     },
 
     attachCloneAnswerContainerHandler: function () {
@@ -74,7 +72,7 @@ let question = {
 
                 question.attachRemoveAnswerContainerHandler(clone.find('.js-remove-answer-container-btn'));
                 question.disableEnableRemoveContainerBtn();
-                question.changeMaxMarkableAnswersRule($(answerContainerSelector).length);
+                question.updateMaxmarkableAnswersMaxRuleValidation($(answerContainerSelector).length - 1);
             });
         }
 
@@ -90,7 +88,7 @@ let question = {
             }
 
             question.disableEnableRemoveContainerBtn();
-            question.changeMaxMarkableAnswersRule($(answerContainerSelector).length);
+            question.updateMaxmarkableAnswersMaxRuleValidation($(answerContainerSelector).length - 1);
         });
     },
 
@@ -121,12 +119,18 @@ let question = {
             'max_markable_answers': {
                 required: {
                     depends: function (element) {
-                        return $('#js-question-type').val() === multipleChoiceType;
+                        return question.isQuestionMultipleChoice();
                     }
                 },
-                min: 2,
-                max: $('.js-answer-container').length - 1
-            }
+                min: {
+                    param: 2,
+                    depends: function (element) {
+                        return question.isQuestionMultipleChoice();
+                    }
+                },
+                max: question.getMaxMarkableMaxRuleObject()
+            },
+            'correct_answer[]': {correctAnswersValid: true}
         }
 
         let messages = {
@@ -140,20 +144,55 @@ let question = {
             }
         }
 
-        validator.addFormValidationHandler('questionForm', rules, messages);
+        validator.addFormValidationHandler('questionForm', rules, messages, null,
+            null, question.questionFormSubmitHandler);
     },
 
-    changeMaxMarkableAnswersRule: function (max) {
-        $('input[name="max_markable_answers"]').rules('remove', 'max');
-        $('input[name="max_markable_answers"]').rules('add', {max: max});
-        //    $.validator.element('input[name="max_markable_answers"]');
+    addCustomCorrectAnswersValidator: function () {
+        $.validator.addMethod('correctAnswersValid', function () {
+            let correctAnswersCount = $('.js-correct-answer:checked').length;
+
+            if (question.isQuestionSingleChoice()) {
+                return correctAnswersCount === 1;
+            } else if (question.isQuestionMultipleChoice()){
+                return correctAnswersCount === parseInt($('input[name="max_markable_answers"]').val());
+            }
+            return true;
+        }, 'Please, indicate correct answers!');
     },
+
+    updateMaxmarkableAnswersMaxRuleValidation: function (value) {
+        let selector = $('input[name="max_markable_answers"]');
+
+        selector.rules('remove', 'max');
+        selector.rules('add', {max: question.getMaxMarkableMaxRuleObject(value)});
+    },
+
+    getMaxMarkableMaxRuleObject: function (max) {
+        return {
+            param: max ?? ($('.js-answer-container').length - 1),
+            depends: function (element) {
+                return question.isQuestionMultipleChoice();
+            }
+        }
+    },
+
+    isQuestionMultipleChoice: function () {
+        return $('#js-question-type').val() === multipleChoiceType;
+    },
+
+    isQuestionSingleChoice: function () {
+        return $('#js-question-type').val() === singleChoiceType;
+    },
+
     init: function () {
         this.loadQuestions();
+
         this.attachIsQuestionOpenHandler();
-        this.attachOnSubmitHandler();
         this.attachCloneAnswerContainerHandler();
         this.attachRemoveAnswerContainerHandler();
+
+        this.addCustomCorrectAnswersValidator();
         this.attachQuestionFormValidator();
     }
 };

@@ -1,62 +1,54 @@
-@extends('page-sidebar', ['title' => 'Test Execution'])
-@section('content')
-    <div class="container">
+@extends('content', ['title' => 'Test Execution'])
+@section('sub-content')
+    <div class="form-container">
         @if($showEvaluateBtn)
             <a class="btn btn-success" href="/testexecution/evaluate/{{ $testExecution->id }}">Evaluate</a>
         @endif
-        <div>
-            <label class="col-md-3 control-label left">Start time:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $testExecution->start_time }}
-                </p>
+        <div class="row">
+            <div class="form-group mt-3">
+                <label class="label-text">START TIME</label>
+                <p>{{ $testExecution->start_time }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">End time:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $testExecution->end_time }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text">END TIME</label>
+                <p>{{ $testExecution->end_time }}</p>
             </div>
-        </div>
-        <div class="col-md-12">
-            <label class="col-md-3 control-label left">Result points:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $testExecution->result_points }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text">RESULT POINTS</label>
+                <p>{{ $testExecution->result_points }}</p>
             </div>
-        </div>
-       @foreach($questions ?? [] as $index => $question)
-            <div>
-                <label class="col-md-2 control-label left">Question {{ $index + 1 }}:</label>
-                <div class="col-md-10">
-                    <p class="form-control-plaintext">
-                        {{ $question->text }}
-                    </p>
+            @forelse($questions as $index => $question)
+                <div class="form-group mt-3">
+                    <label class="label-text">QUESTION {{ $index + 1 }}</label>
+                    <p>{{ $question->text }}</p>
                 </div>
-            </div>
-            @if($question->is_open)
+                @if(in_array($question->question_type_id, \App\Models\Question\QuestionType::OPEN_QUESTIONS))
+                    <div class="col-md-12">
+                        <label class="col-md-3 control-label left">Answer:</label>
+                        <div class="col-md-8">
+                            <p class="form-control-plaintext">
+                                {{ $question->response_text_short }}
+                            </p>
+                        </div>
+                    </div>
+                @else
+            @foreach($question->answers as $answer)
+                    @php
+                        $testExecutionAnswers = explode(',', $question->answer_ids);
+                    @endphp
                 <div class="col-md-12">
-                    <label class="col-md-3 control-label left">Answer:</label>
-                    <div class="col-md-8">
-                        <p class="form-control-plaintext">
-                            {{ $question->response_text_short }}
-                        </p>
+                    <div class="form-group col-md-1 mt-3">
+                        <input class="disabled" disabled type="checkbox"
+                               @if(in_array($answer->id, $testExecutionAnswers)) checked @endif />
+                    </div>
+                    <div class="form-group col-md-7 mt-3">
+                        <p @if($answer->is_correct ===1) class="text-success" @endif>{{ $answer->value }}</p>
                     </div>
                 </div>
-            @else
-                @php
-                    $testExecutionAnswers = explode(',', $question->answer_ids);
-                @endphp
-                @foreach($question->answers ??[] as $answer)
-                    <div>
-                        <input class="col-md-1" type="checkbox" disabled @if(in_array($answer->id, $testExecutionAnswers)) checked @endif/>
-                        <div class="col-md-11 @if($answer->is_correct ===1) text-success @endif">{{ $answer->value }}</div>
-                    </div>
                 @endforeach
-            @endif
-       @endforeach
+                    @endif
+            @empty
+                <h5>NO ANSWERS</h5>
+            @endforelse
     </div>
 @endsection

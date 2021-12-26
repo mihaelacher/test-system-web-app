@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Authorization\User;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionAnswer;
+use App\Models\Question\QuestionType;
 use App\Models\Test\TestExecution;
 use App\Models\Test\TestExecutionAnswer;
 use App\Models\Test\TestHasVisibleUsers;
@@ -195,12 +196,12 @@ class TestExecutionService
                 'questions.id',
                 'questions.text',
                 'questions.points',
-                'questions.is_open',
                 DB::raw('GROUP_CONCAT(tea.question_answer_id) as answer_ids'),
-                'tea.response_text_short'
+                'tea.response_text_short',
+                'question_type_id'
             ]);
         if ($onlyOpen) {
-            $query->where('questions.is_open', '=', 1);
+            $query->whereIn('questions.question_type_id', QuestionType::OPEN_QUESTIONS);
         }
         return $query->get();
     }

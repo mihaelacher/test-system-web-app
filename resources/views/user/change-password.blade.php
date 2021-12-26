@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="form-group mt-3">
                     <label class="label-text" for="password">NEW PASSWORD</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <input id="password" type="password" name="password" class="form-control" required>
                 </div>
                 <div class="form-group mt-3">
                     <label class="label-text" for="password_confirmation">CONFIRM PASSWORD</label>

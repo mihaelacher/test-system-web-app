@@ -1,5 +1,5 @@
-@extends('page-sidebar', ['title' => 'All Test Executions'])
-@section('content')
+@extends('content', ['title' => 'All Test Executions'])
+@section('sub-content')
     <div class="portlet">
         <div class="table-responsive">
             <table id="testExecutionsIndexTable" class="table table-striped table-hover table-bordered">

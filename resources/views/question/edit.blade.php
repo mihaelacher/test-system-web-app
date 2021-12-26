@@ -40,8 +40,8 @@
                             value="{{ $question->max_markable_answers }}">
                 </div>
             </div>
+            <div class="row">
             @forelse($question->answers ?? [] as $answer)
-                <input type="hidden" name="answer_id[]" value="{{ $answer->id }}">
                 <div class="js-answer-container col-md-12">
                     <div class="form-group col-md-1 mt-5">
                         <input class="js-correct-answer" name="correct_answer[]"
@@ -50,13 +50,14 @@
                     </div>
                     <div class="form-group col-md-7 mt-3">
                         <label class="label-text" for="value">ANSWER TEXT</label>
-                        <input type="text" class="form-control" name="value[]" required value="{{ $answer->value }}">
+                        <input type="text" class="form-control" name="value[]" value="{{ $answer->value }}">
                     </div>
                     <button class="mt-5 btn-danger js-remove-answer-container-btn" type="button">-</button>
                 </div>
             @empty
                 @include('question.blocks.answer-container', ['hide' => !$isClosed, 'answer' => null])
             @endforelse
+            </div>
         </form>
         <button id="js-clone-answer-container-btn" class="btn btn-success @if(!$isClosed) hidden @endif">Add Answer</button>
     </div>

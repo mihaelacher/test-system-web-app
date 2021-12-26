@@ -2,8 +2,9 @@
 @section('sub-content')
     @php
         $multipleChoiceType = \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
+        $singleChoiceType = \App\Models\Question\QuestionType::SINGLE_CHOICE;
     @endphp
-    <input id="js-single-choice-type" type="hidden" value="{{ \App\Models\Question\QuestionType::SINGLE_CHOICE }}">
+    <input id="js-single-choice-type" type="hidden" value="{{ $singleChoiceType }}">
     <input id="js-multiple-choice-type" type="hidden" value="{{ $multipleChoiceType }}">
     <div class="form-container">
         <form id="questionForm" action="/questions/store" method="post" role="form" novalidate>
@@ -26,7 +27,9 @@
                     <label class="label-text" for="type">TYPE</label>
                     <select id="js-question-type" class="form-control" name="type">
                         @foreach($questionTypes as $type)
-                            <option value="{{ $type->id }}"> {{ $type->name }} </option>
+                            <option value="{{ $type->id }}" @if($type->id === $singleChoiceType) selected @endif>
+                                {{ $type->name }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -35,7 +38,9 @@
                     <input type="number" class="form-control" name="max_markable_answers">
                 </div>
             </div>
-            @include('question.blocks.answer-container', ['answer' => null, 'questionType' => null, 'hide' => false])
+            <div class="row">
+                @include('question.blocks.answer-container', ['answer' => null, 'questionType' => null, 'hide' => false])
+            </div>
         </form>
         <button id="js-clone-answer-container-btn" class="btn btn-success">Add Answer</button>
     </div>

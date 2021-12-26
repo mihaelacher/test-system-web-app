@@ -154,7 +154,7 @@ let utils = {
                 searchable: false
             }
         ];
-    }
+    },
 
 
 // /**

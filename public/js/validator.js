@@ -28,14 +28,26 @@ var validator = {
 
         if (highlight === undefined || highlight === null) {
             highlight = function (element) {
-                $(element).closest('.form-group').addClass('has-error');
+                let jqElement = $(element);
+
+                if (jqElement.is(':checkbox') || jqElement.is(':radio')) {
+                    jqElement.closest('.row').addClass('has-error');
+                } else {
+                    jqElement.closest('.form-group').addClass('has-error');
+                }
             }
         }
 
         // Definde default unhighlight function.
         if (unhighlight === undefined || unhighlight === null) {
             unhighlight = function (element) {
-                $(element).closest('.form-group').removeClass('has-error');
+                let jqElement = $(element);
+
+                if (jqElement.is(':checkbox') || jqElement.is(':radio')) {
+                    jqElement.closest('.row').removeClass('has-error');
+                } else {
+                    jqElement.closest('.form-group').removeClass('has-error');
+                }
             }
         }
 
@@ -56,8 +68,14 @@ var validator = {
             rules: rules,
             messages: messages,
             errorPlacement: function (error, element) { // render error placement for each input type
-                // default
-                error.insertAfter(element);
+                let jqElement = $(element);
+
+                if (jqElement.is(':checkbox') || jqElement.is(':radio')) {
+                    error.insertBefore(jqElement.closest('.row'));
+                } else {
+                    // default
+                    error.insertAfter(jqElement);
+                }
             },
             invalidHandler: function (form, validator) {
                 if (!validator.numberOfInvalids()) {
@@ -74,6 +92,7 @@ var validator = {
             highlight: highlight,
             unhighlight: unhighlight,
             success: function (label) {
+                label.closest('.row').removeClass('has-error');
                 label.closest('.form-group').removeClass('has-error');
             },
             submitHandler: submitHandler

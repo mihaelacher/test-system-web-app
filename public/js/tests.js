@@ -24,16 +24,20 @@ var test = {
     loadTestQuestions: function (isSelectable) {
         let questionsTable = $('#questionsIndexTable');
         let testId = $('#js-test-id').val();
-        let url = '/ajax/tests/getTestQuestions';
-
-        if (testId) {
-            url.searchParams.append('testId', testId);
-        }
+        let url = new URL('https://test-system-web-app/ajax/tests/getTestQuestions');
 
         if (questionsTable.length) {
             questionsTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
-                    ajax: url,
+                    ajax: {
+                        url: url,
+                        type: 'GET',
+                        contentType: 'application/json',
+                        data: {
+                            testId: testId
+                        }
+
+                    },
                     columns: utils.getQuestionDatatableCols(),
                     select: isSelectable
                 }

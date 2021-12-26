@@ -7,7 +7,7 @@
     <div class="form-container">
         @if($canEdit)
             <a class="btn-success btn" href="/questions/{{ $question->id }}/edit">EDIT</a>
-            <a class="btn-danger" href="/questions/{{ $question->id }}/delete" data-method="delete"
+            <a class="btn btn-danger" href="/questions/{{ $question->id }}/delete" data-method="delete"
                data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this question?">DELETE</a>
         @endif
         <div class="row">
@@ -34,7 +34,6 @@
                 </div>
             @endif
             @if($isMultipleChoiceQuestion || $isSingleChoiceQuestion)
-                <h5 class="label-text">ANSWERS:</h5>
                 @forelse($question->answers ?? [] as $answer)
                     <div class="col-md-12">
                         <div class="form-group col-md-1 mt-3">
