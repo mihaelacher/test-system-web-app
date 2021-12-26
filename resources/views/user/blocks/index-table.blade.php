@@ -1,4 +1,4 @@
-<div class="table-responsive">
+<div class="table-responsive mt-5">
     <table id="usersIndexTable" class="table table-striped table-hover table-bordered">
         <thead>
         <tr>

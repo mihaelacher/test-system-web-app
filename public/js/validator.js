@@ -44,10 +44,7 @@ var validator = {
             submitHandler = function (form, event) {
                 formSuccess.show();
                 formError.hide();
-              //  form.submit();
-                console.log(form);
-                event.stopPropagation();
-                event.preventDefault();
+                form.submit();
             }
         }
 

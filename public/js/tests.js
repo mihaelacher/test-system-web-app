@@ -1,48 +1,53 @@
 var test = {
     loadTests: function () {
-        var testsTable = $('#testsIndexTable');
+        let testsTable = $('#testsIndexTable');
+
         if (testsTable.length) {
             testsTable.DataTable({
-                ajax: '/ajax/tests/getTests',
-                columns: [{
-                    data: 'name',
-                    name: 'name'
-                }, {
-                    data: 'intro_text',
-                    name: 'intro_text'
-                }, {
-                    data: 'max_duration',
-                    name: 'max_duration'
-                }],
-                responsive: true,
-                bFilter: false,
-                lengthChange: false,
-                ordering: false,
-                info: false,
+                ...utils.getCommonDatatableOptions(), ...{
+                    ajax: '/ajax/tests/getTests',
+                    columns: [{
+                        data: 'name',
+                        name: 'name'
+                    }, {
+                        data: 'intro_text',
+                        name: 'intro_text'
+                    }, {
+                        data: 'max_duration',
+                        name: 'max_duration'
+                    }]
+                }
             });
         }
     },
-    handleQuestionLoadBtn: function () {
-        $('#questionsLoadBtn').on('click', function () {
-            var btn = $(this);
-            $.ajax({
-                method: 'GET',
-                url: '/ajax/tests/loadQuestions',
-                dataType: 'html',
-            }).success(function (data) {
-                btn.remove();
-                $('#questionsTable').html(data);
-                question.loadQuestions(true);
-                test.handleQuestionSelectionOnSubmit($('#questionsIndexTable'))
+
+    loadTestQuestions: function (isSelectable) {
+        let questionsTable = $('#questionsIndexTable');
+        let testId = $('#js-test-id').val();
+        let url = '/ajax/tests/getTestQuestions';
+
+        if (testId) {
+            url.searchParams.append('testId', testId);
+        }
+
+        if (questionsTable.length) {
+            questionsTable.DataTable({
+                ...utils.getCommonDatatableOptions(), ...{
+                    ajax: url,
+                    columns: utils.getQuestionDatatableCols(),
+                    select: isSelectable
+                }
             });
-        });
+            test.handleQuestionSelectionOnSubmit(questionsTable);
+        }
     },
-    handleQuestionSelectionOnSubmit: function (tableSelector) {
-        var testForm = $('#testForm');
+
+    handleQuestionSelectionOnSubmit: function () {
+        let testForm = $('#testForm');
 
         testForm.on('submit', function () {
-            var selectedIds = [];
-            var selectedDataTableRows = tableSelector.DataTable().rows({selected: true});
+            let selectedIds = [];
+            let selectedDataTableRows = $('#questionsIndexTable').DataTable().rows('.selected');
 
             if (selectedDataTableRows.count()) {
                 selectedDataTableRows.data().each(function () {
@@ -58,32 +63,35 @@ var test = {
             }
         });
     },
-    loadTestQuestions: function (isSelectable) {
-        var questionsTable = $('#testQuestionsIndexTable');
-        var testId = $('#js-test-id').val();
-        var isEdit = $('#js-is-edit').val();
 
-        if (questionsTable.length) {
-            questionsTable.DataTable({
-                ajax: '/ajax/tests/getTestQuestions?testId=' + testId + (isEdit ? '&isEditMode=1' : ''),
-                columns: question.getQuestionDatatableCols(),
-                responsive: true,
-                select: isSelectable
-            });
-            test.handleQuestionSelectionOnSubmit(questionsTable);
-        }
-    },
     initDateTimePickers: function () {
-        $('#from-time-datetimepicker').datetimepicker({ format: 'DD.MM.YYYY HH:mm'});
-        $('#to-time-datetimepicker').datetimepicker({ format: 'DD.MM.YYYY HH:mm'});
+        $('#from-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
+        $('#to-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
     },
-    init:function () {
+
+    attachTestFormValidator: function () {
+        let rules = {
+            'name': {required: true},
+            'max_duration': {required: true, digits: true}
+        }
+
+        let messages = {
+            'name': 'Please, specify name!',
+            'max_duration': {
+                required: 'Please, specify max duration!'
+            }
+        }
+
+        validator.addFormValidationHandler('testForm', rules, messages);
+    },
+    init: function () {
         this.loadTests();
-        this.handleQuestionLoadBtn();
+        this.handleQuestionSelectionOnSubmit();
         this.loadTestQuestions(window.location.pathname.indexOf('edit') !== -1);
         if (window.location.pathname.indexOf('inviteUsers') !== -1) {
             this.initDateTimePickers();
         }
+        this.attachTestFormValidator();
     }
 };
 test.init();

@@ -13,6 +13,7 @@ use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\Authorization\User;
 use App\Services\UserService;
 use App\Util\MessageUtil;
+use Illuminate\Http\Request;
 
 class UserController extends AuthController
 {
@@ -95,6 +96,17 @@ class UserController extends AuthController
         MessageUtil::success('You have successfully created the user!');
 
         return redirect('/users/index');
+    }
+
+    /**
+     * @method DELETE
+     * @uri /{id}
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request, $id)
+    {
+        // TODO
     }
 
     /**

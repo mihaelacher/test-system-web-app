@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Authorization\User;
+use App\Models\Question\QuestionType;
 use App\Models\Test\Test;
+use App\Models\Test\TestExecution;
 use App\Models\Test\TestHasVisibleUsers;
 use App\Models\Test\TestInstance;
 use App\Models\Test\TestQuestions;
@@ -20,7 +22,8 @@ class TestService
      * @param int $isVisibleForAdmins
      * @return int
      */
-    public static function updateTest(Test $test, string $name, string $introText, int $maxDuration, int $isVisibleForAdmins): int
+    public static function setTestAttributes(Test $test, string $name, string $introText,
+                                      int $maxDuration, int $isVisibleForAdmins): int
     {
         $test->name = $name;
         $test->intro_text = $introText;
@@ -70,16 +73,17 @@ class TestService
                 ->where('thvu.user_id', '=', $currentUser->id);
         }
 
-        return $query;
+        return $query->select(['tests.id', 'name', 'intro_text', 'max_duration']);
     }
 
     /**
      * @param int $testId
      * @param Carbon $activeFrom
      * @param Carbon $activeTo
-     * @return int
+     * @param array $userIds
+     * @return void
      */
-    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo): int
+    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo, array $userIds): void
     {
         $testInstance = new TestInstance();
         $testInstance->test_id = $testId;
@@ -87,27 +91,13 @@ class TestService
         $testInstance->active_to = $activeTo;
         $testInstance->save();
 
-        return $testInstance->id;
+        self::mapUserToTest($testInstance->id, $userIds);
     }
 
-    /**
-     * @param int $testId
-     * @param array $userIds
-     * @param Carbon $activeFrom
-     * @param Carbon $activeTo
-     * @return void
-     */
-    public static function mapUserToTest(int $testInstanceId, array $userIds)
+    public static function destroyTest(int $testId)
     {
-        $rowsForInsert = [];
-
-        foreach ($userIds as $userId) {
-            $rowsForInsert[] = [
-                'test_instance_id' => $testInstanceId,
-                'user_id' => $userId
-            ];
-        }
-        TestHasVisibleUsers::insert($rowsForInsert);
+        TestQuestions::where('test_id', '=', $testId)->delete();
+        Test::findOrFail($testId)->delete();
     }
 
     /**
@@ -119,7 +109,45 @@ class TestService
         return Test::join('test_questions as tq', 'tq.test_id', '=', 'tests.id')
             ->join('questions as q', 'q.id', '=', 'tq.question_id')
             ->where('tests.id', '=', $testId)
-            ->where('q.is_open', '=', 1)
+            ->whereIn('q.question_type_id', QuestionType::OPEN_QUESTIONS)
             ->exists();
+    }
+
+    /**
+     * @param int $testId
+     * @return bool
+     */
+    public static function hasTestQuestions(int $testId): bool
+    {
+        return TestQuestions::where('test_id', '=', $testId)->exists();
+    }
+
+    /**
+     * @param Test $test
+     * @param int $currentUserId
+     * @return bool
+     */
+    public static function canTestBeModified(Test $test, int $currentUserId): bool
+    {
+        return !TestExecution::where('test_id', '=', $test->id)->exists()
+            && $test->created_by === $currentUserId;
+    }
+
+    /**
+     * @param int $testInstanceId
+     * @param array $userIds
+     * @return void
+     */
+    private static function mapUserToTest(int $testInstanceId, array $userIds)
+    {
+        $rowsForInsert = [];
+
+        foreach ($userIds as $userId) {
+            $rowsForInsert[] = [
+                'test_instance_id' => $testInstanceId,
+                'user_id' => $userId
+            ];
+        }
+        TestHasVisibleUsers::insert($rowsForInsert);
     }
 }

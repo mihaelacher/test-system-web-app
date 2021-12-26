@@ -8,6 +8,7 @@ use App\Models\Question\QuestionAnswer;
 use App\Models\Test\TestExecution;
 use App\Models\Test\TestExecutionAnswer;
 use App\Models\Test\TestHasVisibleUsers;
+use App\Models\Test\TestQuestions;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,7 @@ class TestExecutionService
      */
     public static function isTestActiveForCurrentUser(int $testId, int $currentUserId): bool
     {
+        // TODO REMOVE THIS
         date_default_timezone_set('Europe/Sofia');
         $now = Carbon::now();
         return self::isTestVisibleForCurrentUser($currentUserId, $testId, $now)

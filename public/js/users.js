@@ -5,26 +5,23 @@ let user = {
         let usersTable = $('#usersIndexTable');
         if (usersTable.length) {
             usersTable.DataTable({
-                ajax: '/ajax/users/getUsers',
-                columns: [{
-                    data: 'full_name',
-                    name: 'full_name'
-                }, {
-                    data: 'username',
-                    name: 'username'
-                },{
-                    data: 'email',
-                    name: 'email'
-                }, {
-                    data: 'is_admin',
-                    name: 'is_admin'
-                }],
-                responsive: true,
-                select: isSelectable,
-                bFilter: false,
-                lengthChange: false,
-                ordering: false,
-                info: false,
+                ...utils.getCommonDatatableOptions(), ...{
+                    ajax: '/ajax/users/getUsers',
+                    columns: [{
+                        data: 'full_name',
+                        name: 'full_name'
+                    }, {
+                        data: 'username',
+                        name: 'username'
+                    }, {
+                        data: 'email',
+                        name: 'email'
+                    }, {
+                        data: 'is_admin',
+                        name: 'is_admin'
+                    }],
+                    select: isSelectable
+                }
             });
         }
     },
@@ -123,7 +120,7 @@ let user = {
         validator.addFormValidationHandler('changePasswordForm', rules, messages);
     },
 
-    init:function () {
+    init: function () {
         this.loadUsers();
         this.handleUserSelectionOnSubmit();
         this.addCustomPasswordValidationMethods();

@@ -28,7 +28,7 @@
 
 <script src="http://test-system-web-app/js/utils.js"></script>
 
-@if (\Illuminate\Support\Facades\Request::is('questions/*') || \Illuminate\Support\Facades\Request::is('tests/*'))
+@if (\Illuminate\Support\Facades\Request::is('questions/*'))
     <script src="http://test-system-web-app/js/questions.js"></script>
 @endif
 
@@ -36,7 +36,7 @@
     <script src="http://test-system-web-app/js/tests.js"></script>
 @endif
 
-@if (\Illuminate\Support\Facades\Request::is('users/*') || \Illuminate\Support\Facades\Request::is('tests/inviteUsers/*') )
+@if (\Illuminate\Support\Facades\Request::is('users/*') || \Illuminate\Support\Facades\Request::is('tests/*/inviteUsers') )
     <script src="http://test-system-web-app/js/users.js"></script>
 @endif
 

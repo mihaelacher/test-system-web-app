@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Requests\Test\TestCreateRequest;
+use App\Http\Requests\Test\TestDestroyRequest;
 use App\Http\Requests\Test\TestEditRequest;
 use App\Http\Requests\Test\TestIndexRequest;
 use App\Http\Requests\Test\TestShowRequest;
 use App\Http\Requests\Test\TestStoreRequest;
 use App\Http\Requests\Test\TestUpdateRequest;
 use App\Models\Test\Test;
-use App\Models\Test\TestQuestions;
 use App\Services\TestExecutionService;
 use App\Services\TestService;
+use App\Util\MessageUtil;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class TestController extends AuthController
     public function index(TestIndexRequest $request)
     {
         return view('test.index')
-            ->with('currentUser', $request->currentUser);
+            ->with('showCreateBtn', $request->currentUser->is_admin);
     }
 
     /**
@@ -40,15 +41,16 @@ class TestController extends AuthController
     public function show(TestShowRequest $request, $id)
     {
         $currentUser = $request->currentUser;
-        $testHasQuestions = TestQuestions::where('test_id', '=', $id)->count();
-        $showTestExecuteStartBtn = !$currentUser->is_admin
+        $isCurrentUserAdmin = $currentUser->is_admin;
+        $test = Test::findOrFail($id);
+        $showTestExecuteStartBtn = !$isCurrentUserAdmin
             && TestExecutionService::isTestActiveForCurrentUser($id, $currentUser->id);
 
         return view('test.show')
-            ->with('test', Test::findOrFail($id))
-            ->with('hasQuestions', $testHasQuestions)
-            ->with('currentUser', $request->currentUser)
-            ->with('showStartBtn', $showTestExecuteStartBtn);
+            ->with('test', $test)
+            ->with('isCurrentUserAdmin', $isCurrentUserAdmin)
+            ->with('showStartBtn', $showTestExecuteStartBtn)
+            ->with('canEdit', TestService::canTestBeModified($test, $currentUser->id));
     }
 
     /**
@@ -64,67 +66,70 @@ class TestController extends AuthController
 
     /**
      * @method POST
-     * @uri /tests/create
+     * @uri /tests/store
      * @param TestStoreRequest $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function store(TestStoreRequest $request)
     {
-        $testId = TestService::updateTest(new Test(), $request->name, $request->intro_text,
+        $testId = TestService::setTestAttributes(new Test(), $request->name, $request->intro_text,
             $request->max_duration, $request->is_visible_for_admins);
 
         TestService::mapQuestionToTest($testId, array_unique(explode(',', $request->selected_question_ids ?? [])));
+
+        MessageUtil::success('You\'ve successfully created the test!');
 
         return redirect('tests/index');
     }
 
     /**
      * @method GET
-     * @uri /tests/edit/{id}
+     * @uri /tests/{id}/edit
      * @param TestEditRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function edit(TestEditRequest $request, $id)
     {
-        $testHasQuestions = TestQuestions::where('test_id', '=', $id)->count();
-
         return view('test.edit')
-            ->with('test', Test::findOrFail($id))
-            ->with('hasQuestions', $testHasQuestions);
+            ->with('test', Test::findOrFail($id));
     }
 
     /**
      * @method POST
-     * @uri /tests/update/{id}
+     * @uri /tests/{id}/update
      * @param TestUpdateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function update(TestUpdateRequest $request, $id)
     {
-        TestService::updateTest(Test::findOrFail($id), $request->name, $request->intro_text,
+        TestService::setTestAttributes(Test::findOrFail($id), $request->name, $request->intro_text,
             $request->max_duration, $request->is_visible_for_admins);
 
-        TestService::mapQuestionToTest($id, array_unique(explode(',', $request->selected_question_ids ?? [])));
+        TestService::mapQuestionToTest($id, array_unique(explode(',', $request->selected_question_ids ?? '')));
+
+        MessageUtil::success('You\'ve successfully updated the test!');
 
         return redirect('tests/' . $id);
     }
 
     /**
      * @method DELETE
-     * @uri /{id}
-     * @param Request $request
-     * @return void
+     * @uri tests/{id}/delete
+     * @param TestDestroyRequest $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function delete(Request $request, $id)
+    public function delete(TestDestroyRequest $request, $id)
     {
-
+        TestService::destroyTest($id);
+        return redirect('tests/index');
     }
 
     /**
      * @method GET
-     * @uri /tests/inviteUsers/{id}
+     * @uri /tests/{id}/inviteUsers
      * @param Request $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
@@ -137,7 +142,7 @@ class TestController extends AuthController
 
     /**
      * @method Post
-     * @uri /tests/storeInvitations/{id}
+     * @uri /tests/{id}/storeInvitations/
      * @param TestStoreRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
@@ -147,8 +152,10 @@ class TestController extends AuthController
         $activeFrom = Carbon::parse($request->active_from);
         $activeTo = Carbon::parse($request->active_to);
 
-        $testInstanceId = TestService::createTestInstance($id, $activeFrom, $activeTo);
-        TestService::mapUserToTest($testInstanceId, array_unique(explode(',',  $request->selected_user_ids ?? [])));
+        TestService::createTestInstance($id, $activeFrom, $activeTo,
+            array_unique(explode(',',  $request->selected_user_ids ?? [])));
+
+        MessageUtil::success('You\'ve successfully invited users to the the test!');
 
         return redirect('/tests/index');
     }

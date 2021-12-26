@@ -1,7 +1,7 @@
 @extends('content', ['title' => 'Create Test'])
 @section('sub-content')
     <div class="form-container">
-        <form id="testForm" action="/tests/create" method="post" role="form" novalidate>
+        <form id="testForm" action="/tests/store" method="post" role="form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
             <div class="row">
@@ -24,9 +24,8 @@
                         <option value="1">YES</option>
                     </select>
                 </div>
+                @include('question.blocks.index-table')
             </div>
-            <div id="questionsTable" class="col-md-12 mt-5"></div>
         </form>
-        <button id="questionsLoadBtn" type="button" class="col-md-3 btn-secondary btn">LOAD QUESTIONS</button>
     </div>
 @endsection

@@ -32,24 +32,22 @@ var testExecution = {
         var testExecutionsTable = $('#testExecutionsIndexTable');
         if (testExecutionsTable.length) {
             testExecutionsTable.DataTable({
-                ajax: '/ajax/testexecution/getTestExecutions',
-                columns: [{
-                    data: 'name',
-                    name: 'name'
-                }, {
-                    data: 'start_time',
-                    name: 'start_time'
-                }, {
-                    data: 'end_time',
-                    name: 'end_time'
-                }, {
-                    data: 'result_points',
-                    name: 'result_points'
-                }],
-                responsive: true,
-                bFilter: false,
-                lengthChange: false,
-                info: false,
+                ...utils.getCommonDatatableOptions(), ...{
+                    ajax: '/ajax/testexecution/getTestExecutions',
+                    columns: [{
+                        data: 'name',
+                        name: 'name'
+                    }, {
+                        data: 'start_time',
+                        name: 'start_time'
+                    }, {
+                        data: 'end_time',
+                        name: 'end_time'
+                    }, {
+                        data: 'result_points',
+                        name: 'result_points'
+                    }]
+                }
             });
         }
     },
@@ -122,7 +120,7 @@ var testExecution = {
         minutes = minutes < 0 ? '00' : (minutes < 10 ? '0' + minutes : minutes);
         seconds = seconds < 0 ? '00' : (seconds < 10 ? '0' + seconds : seconds);
 
-        return hours + ':' + minutes + ':' +  seconds;
+        return hours + ':' + minutes + ':' + seconds;
     },
     init: function () {
         this.handleSubmitTestExecution();

@@ -1,42 +1,33 @@
-@extends('page-sidebar', ['title' => 'Test'])
-@section('content')
-    <div class="container">
+@extends('content', ['title' => 'Test'])
+@section('sub-content')
+    <div class="form-container">
         <input id="js-test-id" type="hidden" value="{{ $test->id }}">
-        @if($currentUser->is_admin)
-            <a class="btn btn-success" href="/tests/edit/{{ $test->id }}">Edit</a>
-            <a class="btn btn-secondary" href="/tests/inviteUsers/{{ $test->id }}">Invite users to participate</a>
+        @if($canEdit)
+            <a class="btn btn-success" href="/tests/{{ $test->id }}/edit">Edit</a>
+            <a class="btn-danger" href="/tests/{{ $test->id }}/delete" data-method="delete"
+               data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this test?">DELETE</a>
+        @endif
+        @if($isCurrentUserAdmin)
+            <a class="btn btn-secondary" href="/tests/{{ $test->id }}/inviteUsers">Invite users to participate</a>
         @elseif($showStartBtn)
-            <a class="btn btn-success" href="/testexecution/start/{{ $test->id }}">Start</a>
+            <a class="btn btn-success" href="/testexecution/{{ $test->id }}/start">Start</a>
         @endif
-        <h1>Test:</h1>
-        <div>
-            <label class="col-md-3 control-label left">Name:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $test->name }}
-                </p>
+        <div class="row">
+            <div class="form-group mt-3">
+                <label class="label-text" for="name">NAME</label>
+                <p>{{ $test->name }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Intro text:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $test->intro_text }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="name">INTRO TEXT</label>
+                <p>{{ $test->intro_text }}</p>
             </div>
-        </div>
-        <div>
-            <label class="col-md-3 control-label left">Max duration:</label>
-            <div class="col-md-8">
-                <p class="form-control-plaintext">
-                    {{ $test->max_duration }}
-                </p>
+            <div class="form-group mt-3">
+                <label class="label-text" for="name">MAX DURATION</label>
+                <p>{{ $test->max_duration }}</p>
             </div>
-        </div>
-        @if($hasQuestions && $currentUser->is_admin)
-            <div class="col-md-12 mt-5">
+            @if($isCurrentUserAdmin)
                 @include('question.blocks.index-table', ['tableId' => 'testQuestionsIndexTable'])
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 @endsection

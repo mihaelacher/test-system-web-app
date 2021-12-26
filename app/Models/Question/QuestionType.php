@@ -21,4 +21,5 @@ class QuestionType extends MainModel
     const TEXT_SHORT = 4;
 
     const CLOSED_QUESTIONS = [self::SINGLE_CHOICE, self::MULTIPLE_CHOICE];
+    const OPEN_QUESTIONS = [self::NUMERIC, self::TEXT_LONG, self::TEXT_SHORT];
 }
