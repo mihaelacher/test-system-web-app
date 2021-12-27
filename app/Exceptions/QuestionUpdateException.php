@@ -1,5 +1,5 @@
 <?php
 
-namespace App\Exceptions\Questions;
+namespace App\Exceptions;
 
 class QuestionUpdateException extends \Exception {}

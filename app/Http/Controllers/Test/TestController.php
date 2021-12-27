@@ -15,7 +15,6 @@ use App\Services\TestExecutionService;
 use App\Services\TestService;
 use App\Util\MessageUtil;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class TestController extends AuthController
 {
@@ -72,10 +71,7 @@ class TestController extends AuthController
      */
     public function store(TestStoreRequest $request)
     {
-        $testId = TestService::setTestAttributes(new Test(), $request->name, $request->intro_text,
-            $request->max_duration, $request->is_visible_for_admins);
-
-        TestService::mapQuestionToTest($testId, array_unique(explode(',', $request->selected_question_ids ?? [])));
+        TestService::handleTestOperations(new Test(), $request);
 
         MessageUtil::success('You\'ve successfully created the test!');
 
@@ -104,10 +100,7 @@ class TestController extends AuthController
      */
     public function update(TestUpdateRequest $request, $id)
     {
-        TestService::setTestAttributes(Test::findOrFail($id), $request->name, $request->intro_text,
-            $request->max_duration, $request->is_visible_for_admins);
-
-        TestService::mapQuestionToTest($id, array_unique(explode(',', $request->selected_question_ids ?? '')));
+        TestService::handleTestOperations(Test::findOrFail($id), $request);
 
         MessageUtil::success('You\'ve successfully updated the test!');
 
@@ -124,13 +117,16 @@ class TestController extends AuthController
     public function delete(TestDestroyRequest $request, $id)
     {
         TestService::destroyTest($id);
+
+        MessageUtil::success('You\'ve successfully deleted the test!');
+
         return redirect('tests/index');
     }
 
     /**
      * @method GET
      * @uri /tests/{id}/inviteUsers
-     * @param Request $request
+     * @param TestCreateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
@@ -141,7 +137,7 @@ class TestController extends AuthController
     }
 
     /**
-     * @method Post
+     * @method POST
      * @uri /tests/{id}/storeInvitations/
      * @param TestStoreRequest $request
      * @param $id

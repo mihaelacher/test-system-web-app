@@ -3,7 +3,6 @@
     <div class="form-container">
         <form id="testForm" action="/tests/{{ $test->id }}/update" method="post" role="form" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-            <input id="js-test-id" type="hidden" value="{{ $test->id }}">
             <input id="js-is-edit" type="hidden" value="1">
             <button type="submit" class="btnSubmitForm btn-success btn">SUBMIT</button>
             <div class="row">

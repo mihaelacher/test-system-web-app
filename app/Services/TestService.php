@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\TestUpdateException;
+use App\Http\Requests\MainFormRequest;
 use App\Models\Authorization\User;
 use App\Models\Question\QuestionType;
 use App\Models\Test\Test;
@@ -9,50 +11,41 @@ use App\Models\Test\TestExecution;
 use App\Models\Test\TestHasVisibleUsers;
 use App\Models\Test\TestInstance;
 use App\Models\Test\TestQuestions;
+use App\Util\LogUtil;
+use App\Util\MessageUtil;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TestService
 {
-
     /**
      * @param Test $test
-     * @param string $name
-     * @param string $introText
-     * @param int $maxDuration
-     * @param int $isVisibleForAdmins
-     * @return int
-     */
-    public static function setTestAttributes(Test $test, string $name, string $introText,
-                                      int $maxDuration, int $isVisibleForAdmins): int
-    {
-        $test->name = $name;
-        $test->intro_text = $introText;
-        $test->max_duration = $maxDuration;
-        $test->is_visible_for_admins = $isVisibleForAdmins;
-        $test->save();
-
-        return $test->id;
-    }
-
-    /**
-     * @param int $testId
-     * @param array $questionIds
+     * @param MainFormRequest $request
      * @return void
      */
-    public static function mapQuestionToTest(int $testId, array $questionIds): void
+    public static function handleTestOperations(Test $test, MainFormRequest $request)
     {
-        TestQuestions::where('test_id', '=', $testId)->delete();
+        try {
+            DB::beginTransaction();
 
-        $rowsForInsert = [];
+            $testId = self::setTestAttributes($test, $request->name, $request->intro_text,
+                $request->max_duration, $request->is_visible_for_admins);
 
-        foreach ($questionIds as $questionId) {
-            $rowsForInsert[] = [
-                'test_id' => $testId,
-                'question_id' => $questionId
-            ];
+            if (!$testId) {
+                throw new TestUpdateException('Test couldn\'t be saved in DB!');
+            }
+
+            self::mapQuestionToTest($testId,
+                array_unique(explode(',', $request->selected_question_ids ?? '')));
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            LogUtil::logError($e->getMessage());
+
+            MessageUtil::error('Oops...something went wrong!');
         }
-
-        TestQuestions::insert($rowsForInsert);
     }
 
     /**
@@ -96,8 +89,20 @@ class TestService
 
     public static function destroyTest(int $testId)
     {
-        TestQuestions::where('test_id', '=', $testId)->delete();
-        Test::findOrFail($testId)->delete();
+        try {
+            DB::beginTransaction();
+
+            TestQuestions::where('test_id', '=', $testId)->delete();
+            Test::findOrFail($testId)->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            LogUtil::error($e->getMessage());
+
+            MessageUtil::error('Oops...something went wrong');
+        }
     }
 
     /**
@@ -149,5 +154,46 @@ class TestService
             ];
         }
         TestHasVisibleUsers::insert($rowsForInsert);
+    }
+
+    /**
+     * @param Test $test
+     * @param string $name
+     * @param string $introText
+     * @param int $maxDuration
+     * @param int $isVisibleForAdmins
+     * @return int
+     */
+    private static function setTestAttributes(Test $test, string $name, string $introText,
+                                              int $maxDuration, int $isVisibleForAdmins): int
+    {
+        $test->name = $name;
+        $test->intro_text = $introText;
+        $test->max_duration = $maxDuration;
+        $test->is_visible_for_admins = $isVisibleForAdmins;
+        $test->save();
+
+        return $test->id;
+    }
+
+    /**
+     * @param int $testId
+     * @param array $questionIds
+     * @return void
+     */
+    private static function mapQuestionToTest(int $testId, array $questionIds): void
+    {
+        TestQuestions::where('test_id', '=', $testId)->delete();
+
+        $rowsForInsert = [];
+
+        foreach ($questionIds as $questionId) {
+            $rowsForInsert[] = [
+                'test_id' => $testId,
+                'question_id' => $questionId
+            ];
+        }
+
+        TestQuestions::insert($rowsForInsert);
     }
 }

@@ -3,6 +3,7 @@ let user = {
     loadUsers: function () {
         let isSelectable = (window.location.pathname.indexOf('inviteUsers') !== -1);
         let usersTable = $('#usersIndexTable');
+
         if (usersTable.length) {
             usersTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
@@ -123,6 +124,7 @@ let user = {
     init: function () {
         this.loadUsers();
         this.handleUserSelectionOnSubmit();
+
         this.addCustomPasswordValidationMethods();
         this.attachUserFormValidator();
         this.attachChangePasswordValidator();

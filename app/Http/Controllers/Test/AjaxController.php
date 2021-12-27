@@ -32,22 +32,20 @@ class AjaxController extends AuthController
 
     /**
      * @uri GET
-     * @uri /ajax/tests/getTestQuestions
+     * @uri /ajax/tests/{id}/getTestQuestions
      * @param TestCreateRequest $request
+     * @param $id
      * @return mixed
      * @throws \Exception
      */
-    public function getTestQuestions(TestCreateRequest $request)
+    public function getTestQuestions(TestCreateRequest $request, $id)
     {
-        $testId = $request->testId;
-        $isEditMode = $request->isEditMode;
+        $isEditMode = $request->isEdit;
 
         $questionsQuery = Question::join('question_types as qt', 'qt.id', '=', 'questions.question_type_id')
-            ->leftJoin('test_questions as tq', function ($join) use ($testId) {
-                $join->on('tq.question_id', '=', 'questions.id');
-                if ($testId) {
-                    $join->where('tq.test_id', '=', $testId);
-                }
+            ->leftJoin('test_questions as tq', function ($join) use ($id) {
+                $join->on('tq.question_id', '=', 'questions.id')
+                    ->where('tq.test_id', '=', $id);
             })
             ->select([
                 'questions.id',
@@ -57,6 +55,10 @@ class AjaxController extends AuthController
                 'questions.points',
                 'tq.id as test_question'
             ])->orderBy('created_at');
+
+        if (!isset($isEditMode)) {
+            $questionsQuery->whereNotNull('tq.id');
+        }
 
         $table = DataTables::of($questionsQuery)
             ->editColumn('title', '<a href="/questions/{{$id}}"> {{ $title }} </a>');

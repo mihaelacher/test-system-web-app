@@ -6,8 +6,11 @@ use App\Http\Requests\MainGetRequest;
 
 class TestIndexRequest extends MainGetRequest
 {
+    /**
+     * @return bool
+     */
     public function authorize(): bool
     {
-        return true;
+        return !is_null($this->currentUser);
     }
 }

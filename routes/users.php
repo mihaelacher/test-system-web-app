@@ -17,7 +17,7 @@ Route::group(['prefix' => 'users/'], function () {
     Route::post('{id}/update', 'User\UserController@update');
     Route::get('{id}/changePassword', 'User\UserController@changePassword');
     Route::post('{id}/storePassword', 'User\UserController@storePassword');
-    Route::delete('{id}', 'User\UserController@delete');
+    Route::delete('{id}/delete', 'User\UserController@delete');
     Route::get('{id}', 'User\UserController@show');
 });
 

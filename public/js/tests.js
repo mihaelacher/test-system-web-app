@@ -21,56 +21,54 @@ var test = {
         }
     },
 
-    loadTestQuestions: function (isSelectable) {
+    loadTestQuestions: function () {
         let questionsTable = $('#questionsIndexTable');
-        let testId = $('#js-test-id').val();
-        let url = new URL('https://test-system-web-app/ajax/tests/getTestQuestions');
 
         if (questionsTable.length) {
+            let currentUrl = window.location.pathname;
+            let isEditMode = currentUrl.indexOf('edit') !== -1;
+            let match = /tests\/(\d+)/.exec(window.location.pathname);
+            console.log(match[1]);
+            let ajaxUrl = match === null
+                ? '/ajax/questions/getQuestions'
+                : '/ajax/tests/' + match[1] + '/getTestQuestions' + (isEditMode ? '?isEdit=1' : '');
+
             questionsTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
-                    ajax: {
-                        url: url,
-                        type: 'GET',
-                        contentType: 'application/json',
-                        data: {
-                            testId: testId
-                        }
-
-                    },
+                    ajax: ajaxUrl,
                     columns: utils.getQuestionDatatableCols(),
-                    select: isSelectable
+                    select: isEditMode
                 }
             });
             test.handleQuestionSelectionOnSubmit(questionsTable);
         }
     },
 
-    handleQuestionSelectionOnSubmit: function () {
-        let testForm = $('#testForm');
+    handleQuestionSelectionOnSubmit: function (form) {
+        let selectedIds = [];
+        let selectedDataTableRows = $('#questionsIndexTable').DataTable().rows('.selected');
 
-        testForm.on('submit', function () {
-            let selectedIds = [];
-            let selectedDataTableRows = $('#questionsIndexTable').DataTable().rows('.selected');
+        if (selectedDataTableRows.count()) {
+            selectedDataTableRows.data().each(function () {
+                $.each(this, function (index, value) {
+                    selectedIds.push(value.id);
+                })
+            });
 
-            if (selectedDataTableRows.count()) {
-                selectedDataTableRows.data().each(function () {
-                    $.each(this, function (index, value) {
-                        selectedIds.push(value.id);
-                    })
-                });
+            $('<input />').attr('type', 'hidden')
+                .attr('name', 'selected_question_ids')
+                .attr('value', selectedIds.join(','))
+                .appendTo(form);
+        }
 
-                $('<input />').attr('type', 'hidden')
-                    .attr('name', 'selected_question_ids')
-                    .attr('value', selectedIds.join(','))
-                    .appendTo(testForm);
-            }
-        });
+        form.submit();
     },
 
     initDateTimePickers: function () {
-        $('#from-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
-        $('#to-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
+        if (window.location.pathname.indexOf('inviteUsers') !== -1) {
+            $('#from-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
+            $('#to-time-datetimepicker').datetimepicker({format: 'DD.MM.YYYY HH:mm'});
+        }
     },
 
     attachTestFormValidator: function () {
@@ -86,15 +84,15 @@ var test = {
             }
         }
 
-        validator.addFormValidationHandler('testForm', rules, messages);
+        validator.addFormValidationHandler('testForm', rules, messages, null,
+            null, test.handleQuestionSelectionOnSubmit);
     },
     init: function () {
         this.loadTests();
-        this.handleQuestionSelectionOnSubmit();
-        this.loadTestQuestions(window.location.pathname.indexOf('edit') !== -1);
-        if (window.location.pathname.indexOf('inviteUsers') !== -1) {
-            this.initDateTimePickers();
-        }
+        this.loadTestQuestions();
+
+        this.initDateTimePickers();
+
         this.attachTestFormValidator();
     }
 };

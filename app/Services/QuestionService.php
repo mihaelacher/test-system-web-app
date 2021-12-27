@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Exceptions\Questions\QuestionUpdateException;
+use App\Exceptions\QuestionUpdateException;
 use App\Http\Requests\MainFormRequest;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionAnswer;
@@ -10,6 +10,7 @@ use App\Models\Question\QuestionType;
 use App\Models\Test\TestExecution;
 use App\Models\Test\TestQuestions;
 use App\Util\LogUtil;
+use App\Util\MessageUtil;
 use Illuminate\Support\Facades\DB;
 
 class QuestionService
@@ -41,9 +42,11 @@ class QuestionService
             DB::commit();
 
         } catch (\Exception $e) {
-            DB::rollBack()
-            ;
+            DB::rollBack();
+
             LogUtil::logError($e->getMessage());
+
+            MessageUtil::error('Oops...Something went wrong');
         }
     }
 
@@ -69,6 +72,8 @@ class QuestionService
             DB::rollBack();
 
             LogUtil::logError($e->getMessage());
+
+            MessageUtil::error('Oops...Something went wrong');
         }
     }
 

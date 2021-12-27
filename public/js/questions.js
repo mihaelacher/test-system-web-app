@@ -40,9 +40,9 @@ let question = {
         });
     },
 
-    questionFormSubmitHandler: function (form, event) {
+    questionFormSubmitHandler: function (form) {
         let selector = $('.js-correct-answer');
-        // todo create submit handler
+
         if (selector.length) {
             $.each(selector, function (i, el) {
                 $('<input />').attr('type', 'hidden')

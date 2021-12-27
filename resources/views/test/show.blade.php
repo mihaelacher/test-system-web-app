@@ -4,7 +4,7 @@
         <input id="js-test-id" type="hidden" value="{{ $test->id }}">
         @if($canEdit)
             <a class="btn btn-success" href="/tests/{{ $test->id }}/edit">Edit</a>
-            <a class="btn-danger" href="/tests/{{ $test->id }}/delete" data-method="delete"
+            <a class="btn btn-danger" href="/tests/{{ $test->id }}/delete" data-method="delete"
                data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this test?">DELETE</a>
         @endif
         @if($isCurrentUserAdmin)

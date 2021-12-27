@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Requests\User\UserCreateRequest;
+use App\Http\Requests\User\UserDestroyRequest;
 use App\Http\Requests\User\UserEditRequest;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserShowRequest;
@@ -13,7 +14,6 @@ use App\Http\Requests\User\UserUpdateRequest;
 use App\Models\Authorization\User;
 use App\Services\UserService;
 use App\Util\MessageUtil;
-use Illuminate\Http\Request;
 
 class UserController extends AuthController
 {
@@ -100,13 +100,18 @@ class UserController extends AuthController
 
     /**
      * @method DELETE
-     * @uri /{id}
-     * @param Request $request
-     * @return void
+     * @uri users/{id}/delete
+     * @param UserDestroyRequest $request
+     * @param $id
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function delete(Request $request, $id)
+    public function delete(UserDestroyRequest $request, $id)
     {
-        // TODO
+        UserService::destroyUser($id);
+
+        MessageUtil::success('You have successfully deleted the user!');
+
+        return redirect('/users/index');
     }
 
     /**
@@ -134,6 +139,7 @@ class UserController extends AuthController
         UserService::changeUserPassword(User::findOrFail($id), $request->password);
 
         MessageUtil::success('You have successfully changed the user\'s password!');
+
         return redirect('/users/index');
     }
 }

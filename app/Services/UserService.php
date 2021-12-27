@@ -37,4 +37,13 @@ class UserService
         $user->password = Hash::make($plainPassword);
         $user->save();
     }
+
+    /**
+     * @param int $userId
+     * @return void
+     */
+    public static function destroyUser(int $userId)
+    {
+        User::findOrFail($userId)->delete();
+    }
 }
