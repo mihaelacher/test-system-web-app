@@ -14,6 +14,8 @@ use App\Models\Test\TestExecution;
 use App\Services\TestExecutionService;
 use App\Services\TestService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Session;
 use function redirect;
 use function view;
 
@@ -33,7 +35,7 @@ class TestExecutionController extends AuthController
 
     /**
      * @method GET
-     * @uri /testexecution/show/{id}
+     * @uri /testexecution/{id}/show
      * @param TestExecutionShowRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
@@ -51,36 +53,37 @@ class TestExecutionController extends AuthController
     }
 
     /**
-     * @uri /testexecution/start/{id}
+     * @uri /testexecution/{testId}/start
      * @method GET
      * @param TestExecutionStartRequest $request
-     * @param $id
+     * @param $testId
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function start(TestExecutionStartRequest $request, $id)
+    public function start(TestExecutionStartRequest $request, $testId)
     {
         date_default_timezone_set('Europe/Sofia');
         $currentUserId = $request->currentUser->id;
-        $testExecution = TestExecutionService::findTestExecutionInDb($currentUserId, $id, true);
-        $testMaxDuration = Test::findOrFail($id)->max_duration * 60;
+        $testExecution = TestExecutionService::findTestExecutionInDb($currentUserId, $testId, true);
+        $testMaxDuration = Test::findOrFail($testId)->max_duration * 60;
+
         $timeRemainingInSec = !$testExecution
             ? $testMaxDuration
             : ($testMaxDuration - Carbon::now()->diffInSeconds(Carbon::parse($testExecution->start_time)));
 
         if (!$testExecution) {
-            $testExecution = TestExecutionService::startTestExecution($currentUserId, $id);
+            $testExecution = TestExecutionService::startTestExecution($currentUserId, $testId);
         }
 
         return view('test-execution.execute')
             ->with('remainingTime', gmdate('H:i:s', $timeRemainingInSec))
             ->with('timeRemainingInSec', $timeRemainingInSec)
             ->with('testExecutionId', $testExecution->id)
-            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($id));
+            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($testId));
     }
 
     /**
      * @method POST
-     * @uri /testexecution/submit/{id}
+     * @uri /testexecution/{id}/submit
      * @param TestExecutionSubmitRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
@@ -94,7 +97,7 @@ class TestExecutionController extends AuthController
 
     /**
      * @method GET
-     * @uri /testexecution/evaluate/{id}
+     * @uri /testexecution/{id}/evaluate
      * @param TestExecutionEvaluateRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
@@ -110,7 +113,7 @@ class TestExecutionController extends AuthController
 
     /**
      * @method POST
-     * @uri /testexecution/evaluate/{id}
+     * @uri /testexecution/{id}/evaluate
      * @param TestExecutionSubmitEvaluationRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector

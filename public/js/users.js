@@ -1,53 +1,16 @@
 let user = {
-    // TODO: find a better way to do this
+
     loadUsers: function () {
-        let isSelectable = (window.location.pathname.indexOf('inviteUsers') !== -1);
         let usersTable = $('#usersIndexTable');
 
         if (usersTable.length) {
             usersTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
                     ajax: '/ajax/users/getUsers',
-                    columns: [{
-                        data: 'full_name',
-                        name: 'full_name'
-                    }, {
-                        data: 'username',
-                        name: 'username'
-                    }, {
-                        data: 'email',
-                        name: 'email'
-                    }, {
-                        data: 'is_admin',
-                        name: 'is_admin'
-                    }],
-                    select: isSelectable
+                    columns: utils.getUsersDatatableCols(),
                 }
             });
         }
-    },
-
-    // TODO: this function doesn't belong to user.js
-    handleUserSelectionOnSubmit: function () {
-        let testForm = $('#testParticipationForm');
-
-        testForm.on('submit', function () {
-            let selectedIds = [];
-            let selectedDataTableRows = $('#usersIndexTable').DataTable().rows({selected: true});
-
-            if (selectedDataTableRows.count()) {
-                selectedDataTableRows.data().each(function () {
-                    $.each(this, function (index, value) {
-                        selectedIds.push(value.id);
-                    })
-                });
-
-                $('<input />').attr('type', 'hidden')
-                    .attr('name', 'selected_user_ids')
-                    .attr('value', selectedIds.join(','))
-                    .appendTo(testForm);
-            }
-        });
     },
 
     addCustomPasswordValidationMethods: function () {
@@ -123,7 +86,6 @@ let user = {
 
     init: function () {
         this.loadUsers();
-        this.handleUserSelectionOnSubmit();
 
         this.addCustomPasswordValidationMethods();
         this.attachUserFormValidator();

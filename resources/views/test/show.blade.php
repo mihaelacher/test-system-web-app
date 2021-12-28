@@ -1,16 +1,19 @@
 @extends('content', ['title' => 'Test'])
 @section('sub-content')
+    @php
+        $testId = $test->id;
+    @endphp
     <div class="form-container">
-        <input id="js-test-id" type="hidden" value="{{ $test->id }}">
+        <input id="js-test-id" type="hidden" value="{{ $testId }}">
         @if($canEdit)
-            <a class="btn btn-success" href="/tests/{{ $test->id }}/edit">Edit</a>
-            <a class="btn btn-danger" href="/tests/{{ $test->id }}/delete" data-method="delete"
+            <a class="btn btn-success" href="/tests/{{ $testId }}/edit">Edit</a>
+            <a class="btn btn-danger" href="/tests/{{ $testId }}/delete" data-method="delete"
                data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this test?">DELETE</a>
         @endif
         @if($isCurrentUserAdmin)
-            <a class="btn btn-secondary" href="/tests/{{ $test->id }}/inviteUsers">Invite users to participate</a>
+            <a class="btn btn-secondary" href="/tests/{{ $testId }}/inviteUsers">Invite users to participate</a>
         @elseif($showStartBtn)
-            <a class="btn btn-success" href="/testexecution/{{ $test->id }}/start">Start</a>
+            <a class="btn btn-success" href="/testexecution/{{ $testId }}/start">Start</a>
         @endif
         <div class="row">
             <div class="form-group mt-3">

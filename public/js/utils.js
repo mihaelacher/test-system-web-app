@@ -116,6 +116,8 @@ let utils = {
         } else if (type === 'info') {
             toast.info(msg);
         } else {
+            localStorage.clear();
+
             toastr.success(msg);
         }
     },
@@ -155,6 +157,39 @@ let utils = {
             }
         ];
     },
+
+    getUsersDatatableCols: function () {
+       return [{
+           data: 'full_name',
+           name: 'full_name'
+       }, {
+           data: 'username',
+           name: 'username'
+       }, {
+           data: 'email',
+           name: 'email'
+       }, {
+           data: 'is_admin',
+           name: 'is_admin'
+       }];
+    },
+
+    getDataFromCache: function (cacheKey) {
+        let data = undefined;
+
+        if (typeof Storage !== undefined) {
+            try {
+                data = JSON.parse(localStorage.getItem(cacheKey));
+            } catch (e) {
+                return false;
+            }
+        }
+        return data;
+    },
+
+    putDataInCache: function (cacheKey, data) {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+    }
 
 
 // /**

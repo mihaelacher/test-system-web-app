@@ -72,6 +72,8 @@ var validator = {
 
                 if (jqElement.is(':checkbox') || jqElement.is(':radio')) {
                     error.insertBefore(jqElement.closest('.row'));
+                } else if (jqElement.hasClass('datetimepicker')) {
+                    error.insertAfter(jqElement.closest('.input-group'));
                 } else {
                     // default
                     error.insertAfter(jqElement);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Test;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Requests\Test\StoreTestInvitationsRequest;
 use App\Http\Requests\Test\TestCreateRequest;
 use App\Http\Requests\Test\TestDestroyRequest;
 use App\Http\Requests\Test\TestEditRequest;
@@ -114,7 +115,7 @@ class TestController extends AuthController
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function delete(TestDestroyRequest $request, $id)
+    public function destroy(TestDestroyRequest $request, $id)
     {
         TestService::destroyTest($id);
 
@@ -139,17 +140,17 @@ class TestController extends AuthController
     /**
      * @method POST
      * @uri /tests/{id}/storeInvitations/
-     * @param TestStoreRequest $request
+     * @param StoreTestInvitationsRequest $request
      * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function storeInvitations(TestStoreRequest $request, $id)
+    public function storeInvitations(StoreTestInvitationsRequest $request, $id)
     {
         $activeFrom = Carbon::parse($request->active_from);
         $activeTo = Carbon::parse($request->active_to);
 
         TestService::createTestInstance($id, $activeFrom, $activeTo,
-            array_unique(explode(',',  $request->selected_user_ids ?? [])));
+            explode(',',  $request->selected_user_ids ?? ''));
 
         MessageUtil::success('You\'ve successfully invited users to the the test!');
 

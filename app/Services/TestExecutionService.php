@@ -35,7 +35,7 @@ class TestExecutionService
      * @param Carbon $now
      * @return mixed
      */
-    private static function isTestVisibleForCurrentUser(int $currentUserId, int $testId, Carbon $now)
+    public static function isTestVisibleForCurrentUser(int $currentUserId, int $testId, Carbon $now)
     {
         return TestHasVisibleUsers::join('test_instances as ti', 'ti.id', '=', 'test_has_visible_users.test_instance_id')
             ->where('ti.test_id', '=', $testId)
@@ -70,7 +70,7 @@ class TestExecutionService
      * @param int $testId
      * @return TestExecution
      */
-    public static function startTestExecution(int $currentUserId, int $testId)
+    public static function startTestExecution(int $currentUserId, int $testId): TestExecution
     {
         date_default_timezone_set('Europe/Sofia');
 
@@ -91,14 +91,18 @@ class TestExecutionService
     {
         return DB::table('test_questions as tq')
             ->join('questions as q', 'q.id', '=', 'tq.question_id')
-            ->leftJoin('question_answers as qa', 'qa.question_id', '=', 'q.id')
+            ->leftJoin('question_answers as qa', function ($join) {
+                $join->on('qa.question_id', '=', 'q.id')
+                    ->whereIn('q.question_type_id', QuestionType::CLOSED_QUESTIONS);
+            })
             ->where('tq.test_id', '=', $testId)
             ->select([
                 'q.id',
                 'q.text',
                 'q.instruction',
                 'q.points',
-                'q.is_open',
+                'question_type_id',
+                'q.max_markable_answers',
                 DB::raw('GROUP_CONCAT(CONCAT(qa.id, "-", qa.value)) as answers')
             ])
             ->groupBy('q.id')
@@ -153,7 +157,7 @@ class TestExecutionService
     private static function getQuestionsIdAndPointsArrByTestId(int $testId)
     {
         return Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
-            ->where('is_open', '=', 0)
+            ->whereIn('questions.question_type_id', QuestionType::CLOSED_QUESTIONS)
             ->where('tq.test_id', '=', $testId)
             ->pluck('points', 'questions.id')
             ->toArray();

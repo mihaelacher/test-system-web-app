@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'testexecution/'], function() {
     Route::get('index', 'TestExecution\TestExecutionController@index');
-    Route::get('show/{id}', 'TestExecution\TestExecutionController@show');
-    Route::get('evaluate/{id}', 'TestExecution\TestExecutionController@evaluate');
-    Route::post('evaluate/{id}', 'TestExecution\TestExecutionController@submitEvaluation');
-    Route::get('start/{id}', 'TestExecution\TestExecutionController@start');
-    Route::post('submit/{id}', 'TestExecution\TestExecutionController@submit');
+    Route::get('{id}/show', 'TestExecution\TestExecutionController@show');
+    Route::get('{id}/evaluate', 'TestExecution\TestExecutionController@evaluate');
+    Route::post('{id}/evaluate', 'TestExecution\TestExecutionController@submitEvaluation');
+    Route::get('{testId}/start', 'TestExecution\TestExecutionController@start');
+    Route::post('{id}/submit', 'TestExecution\TestExecutionController@submit');
 });
 
 Route::group(['prefix' => 'ajax/'], function () {
     Route::get('testexecution/getTestExecutions', 'TestExecution\AjaxController@getTestExecutionsDataTable');
-    Route::post('testexecution/submitOpenQuestion/{id}', 'TestExecution\AjaxController@submitOpenQuestion');
-    Route::post('testexecution/submitQuestionAnswer/{id}', 'TestExecution\AjaxController@submitQuestionAnswer');
+    Route::post('testexecution/{id}/submitOpenQuestion', 'TestExecution\AjaxController@submitOpenQuestion');
+    Route::post('testexecution/{id}/submitQuestionAnswer', 'TestExecution\AjaxController@submitQuestionAnswer');
 });

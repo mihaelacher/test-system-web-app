@@ -1,35 +1,9 @@
 var testCountDownTimer = 0;
 var timeRemainingInSec = $('#timeRemainingInSec').val();
 var testExecution = {
-    handleSubmitTestExecution: function () {
-        var form = $('#executionForm');
-
-        if (form.length) {
-            var questionAnswers = [];
-
-            form.on('submit', function () {
-                $('.js-question-answers').each(function () {
-                    $this = $(this);
-                    if ($this.is(':checked')) {
-                        var questionId = $this.data('question_id');
-                        var answerId = $this.data('answer_id');
-
-                        if (!questionAnswers[questionId]) {
-                            questionAnswers[questionId] = [];
-                        }
-                        // TODO: remove empty entries
-                        questionAnswers[questionId].push(answerId);
-                    }
-                })
-                $('<input />').attr('type', 'hidden')
-                    .attr('name', 'question_answers')
-                    .attr('value', JSON.stringify(questionAnswers))
-                    .appendTo(form);
-            });
-        }
-    },
     loadTestExecutions: function () {
         var testExecutionsTable = $('#testExecutionsIndexTable');
+
         if (testExecutionsTable.length) {
             testExecutionsTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
@@ -60,7 +34,7 @@ var testExecution = {
                 questionId: $this.data('question_id'),
             }
 
-            if ($this.is(':checkbox')) {
+            if ($this.is(':checkbox') || $this.is(':radio')) {
                 var isChecked = $this.is(':checked');
                 data['answerId'] = $this.data('answer_id');
                 data['isChecked'] = isChecked ? 1 : 0;
@@ -76,24 +50,37 @@ var testExecution = {
     triggerOpenQuestionAjaxCall: function (testExecutionId, data, element) {
         $.ajax({
             method: 'POST',
-            url: '/ajax/testexecution/submitOpenQuestion/' + testExecutionId,
+            url: '/ajax/testexecution/' + testExecutionId + '/submitOpenQuestion',
             data: data
-        }).success(function (response) {
+        })
+            .success(function (response) {
             if (parseInt(response) !== 1) {
                 element.val('');
+            } else {
+                utils.showToastrMessage('You\'ve successfully submitted the answer.', 'success')
             }
-        });
+        })
+            .error(function () {
+                utils.showToastrMessage('Time is out!', 'error');
+            });
     },
     triggerQuestionAnswerAjaxCall: function (testExecutionId, data, checkbox, isChecked) {
         $.ajax({
             method: 'POST',
-            url: '/ajax/testexecution/submitQuestionAnswer/' + testExecutionId,
+            url: '/ajax/testexecution/' + testExecutionId + '/submitQuestionAnswer',
             data: data
-        }).success(function (response) {
-            if (parseInt(response) !== 1) {
+        })
+            .success(function (response) {
+            if (parseInt(response) === 0) {
+                utils.showToastrMessage('You\'ve reached answers limit!', 'error');
                 checkbox.prop('checked', !isChecked);
+            } else {
+                utils.showToastrMessage('You\'ve successfully submitted the answer.', 'success');
             }
-        });
+        })
+            .error(function () {
+                utils.showToastrMessage('Time is out!', 'error');
+            });
     },
     initTestCountDown: function () {
         var testCountDown = $('#testCountDown');
@@ -123,7 +110,6 @@ var testExecution = {
         return hours + ':' + minutes + ':' + seconds;
     },
     init: function () {
-        this.handleSubmitTestExecution();
         this.loadTestExecutions();
         this.initAnsweredQuestionHandler();
         this.initTestCountDown();

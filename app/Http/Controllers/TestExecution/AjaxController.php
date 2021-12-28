@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Requests\TestExecution\TestExecutionIndexRequest;
 use App\Http\Requests\TestExecution\TestExecutionSubmitAnswerRequest;
 use App\Services\TestExecutionService;
+use App\Util\MessageUtil;
 use Yajra\DataTables\DataTables;
 
 class AjaxController extends AuthController
@@ -27,7 +28,7 @@ class AjaxController extends AuthController
             ]);
 
         $table = DataTables::of($questionsQuery)
-            ->editColumn('name', '<a href="/testexecution/show/{{$id}}"> {{ $name }} </a>');
+            ->editColumn('name', '<a href="/testexecution/{{$id}}/show"> {{ $name }} </a>');
 
         return $table->rawColumns(['name'])->make(true);
     }

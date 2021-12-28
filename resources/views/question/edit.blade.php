@@ -3,8 +3,8 @@
     @php
         $singleChoiceType =  \App\Models\Question\QuestionType::SINGLE_CHOICE;
         $multipleChoiceType = \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
-        $questionType = $question->question_type_id;
-        $isClosed = $questionType === $singleChoiceType || $questionType === $multipleChoiceType;
+        $questionTypeId = (int) old('type') ?? $question->question_type_id;
+        $isClosed = $questionTypeId === $singleChoiceType || $questionTypeId === $multipleChoiceType;
     @endphp
     <input id="js-single-choice-type" type="hidden" value="{{ $singleChoiceType }}">
     <input id="js-multiple-choice-type" type="hidden" value="{{ $multipleChoiceType }}">
@@ -15,48 +15,54 @@
             <div class="row">
                 <div class="form-group mt-3">
                     <label class="label-text" for="text">TEXT</label>
-                    <input type="text" name="text" class="form-control" required value="{{ $question->text }}">
+                    <input type="text" name="text" class="form-control" required
+                           value="{{ old('text') ?? $question->text }}">
                 </div>
                 <div class="form-group mt-3">
                     <label class="label-text" for="instruction">INSTRUCTION</label>
-                    <textarea class="form-control" name="instruction" rows="3">{{ $question->instruction }}</textarea>
+                    <textarea class="form-control" name="instruction" rows="3">{{ old('instruction') ?? $question->instruction }}
+                    </textarea>
                 </div>
                 <div class="form-group mt-3">
                     <label class="label-text" for="points">POINTS</label>
-                    <input type="number" class="form-control" name="points" required value="{{ $question->points }}">
+                    <input type="number" class="form-control" name="points" required
+                           value="{{ old('points') ?? $question->points }}">
                 </div>
                 <div class="form-group mt-3">
                     <label class="label-text" for="type">TYPE</label>
                     <select id="js-question-type" class="form-control" name="type">
                         @foreach($questionTypes as $type)
-                            <option  @if($questionType === $type->id) selected @endif
+                            <option  @if($questionTypeId === $type->id) selected @endif
                             value="{{ $type->id }}"> {{ $type->name }} </option>
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group mt-3 @if($questionType !== $multipleChoiceType) hidden @endif js-max-markable-answers">
+                <div class="form-group mt-3 @if($questionTypeId !== $multipleChoiceType) hidden @endif js-max-markable-answers">
                     <label class="label-text" for="max_markable_answers">MAX MARKABLE ANSWERS</label>
                     <input type="number" class="form-control" name="max_markable_answers"
-                            value="{{ $question->max_markable_answers }}">
+                            value="{{ old('max_markable_answers') ?? $question->max_markable_answers }}">
                 </div>
             </div>
             <div class="row">
-            @forelse($question->answers ?? [] as $answer)
-                <div class="js-answer-container col-md-12">
-                    <div class="form-group col-md-1 mt-5">
-                        <input class="js-correct-answer" name="correct_answer[]"
-                               type="{{ $questionType === $multipleChoiceType ? 'checkbox' : 'radio' }}"
-                               @if($answer->is_correct) checked @endif>
-                    </div>
-                    <div class="form-group col-md-7 mt-3">
-                        <label class="label-text" for="value">ANSWER TEXT</label>
-                        <input type="text" class="form-control" name="value[]" value="{{ $answer->value }}">
-                    </div>
-                    <button class="mt-5 btn-danger js-remove-answer-container-btn" type="button">-</button>
-                </div>
-            @empty
-                @include('question.blocks.answer-container', ['hide' => !$isClosed, 'answer' => null])
-            @endforelse
+                @if(!empty(old()))
+                    @forelse(old('value') as $index => $answer)
+                        @include('question.blocks.answer-container',
+                                    ['hide' => !$isClosed,
+                                    'isChecked' => old('is_correct.' . $index),
+                                    'value' => $answer])
+                    @empty
+                        @include('question.blocks.answer-container',['hide' => !$isClosed])
+                    @endforelse
+                @else
+                    @forelse($question->answers ?? [] as $index => $answer)
+                        @include('question.blocks.answer-container',
+                                ['hide' => !$isClosed,
+                                'isChecked' => $answer->is_correct,
+                                'value' => $answer->value])
+                    @empty
+                        @include('question.blocks.answer-container',['hide' => !$isClosed])
+                    @endforelse
+                @endif
             </div>
         </form>
         <button id="js-clone-answer-container-btn" class="btn btn-success @if(!$isClosed) hidden @endif">Add Answer</button>

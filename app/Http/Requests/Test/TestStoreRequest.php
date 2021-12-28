@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Test;
 
 use App\Http\Requests\AuthorizeAdminRequestTrait;
-use App\Http\Requests\MainFormRequest;
 
-class TestStoreRequest extends MainFormRequest
+class TestStoreRequest extends TestValidateRequest
 {
     use AuthorizeAdminRequestTrait;
 }

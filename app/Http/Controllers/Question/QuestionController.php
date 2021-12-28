@@ -82,6 +82,7 @@ class QuestionController extends AuthController
      */
     public function edit(QuestionEditRequest $request, $id)
     {
+      //  dd(old('value'));
       return view('question.edit')
             ->with('questionTypes', QuestionType::all()->sortBy('id'))
             ->with('question', Question::findOrFail($id))

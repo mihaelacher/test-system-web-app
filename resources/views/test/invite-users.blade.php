@@ -13,7 +13,8 @@
                         <div class='col-sm-6'>
                             <div class="form-group">
                                 <div class='input-group date' id='from-time-datetimepicker'>
-                                    <input type='text' class="form-control" name="active_from"/>
+                                    <input id="activeFrom" type='text' class="form-control datetimepicker"
+                                           name="active_from" value="{{ old('active_from') }}"/>
                                     <span class="input-group-addon">
                                         <span class="glyphicon glyphicon-calendar"></span>
                                     </span>
@@ -30,7 +31,8 @@
                         <div class='col-sm-6'>
                             <div class="form-group">
                                 <div class='input-group date' id='to-time-datetimepicker'>
-                                    <input type='text' class="form-control" name="active_to"/>
+                                    <input id="activeTo" type='text' class="form-control datetimepicker"
+                                           name="active_to" value="{{ old('active_to') }}"/>
                                     <span class="input-group-addon">
                                         <span class="glyphicon glyphicon-calendar"></span>
                                     </span>

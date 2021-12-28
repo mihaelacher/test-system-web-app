@@ -4,6 +4,7 @@ namespace App\Http\Requests\TestExecution;
 
 use App\Http\Requests\MainGetRequest;
 use App\Models\Test\TestHasVisibleUsers;
+use App\Services\TestExecutionService;
 use Carbon\Carbon;
 
 class TestExecutionStartRequest extends MainGetRequest
@@ -13,12 +14,6 @@ class TestExecutionStartRequest extends MainGetRequest
         date_default_timezone_set('Europe/Sofia');
         $now = Carbon::now();
 
-        return TestHasVisibleUsers::join('test_instances as ti',
-            'ti.id', '=', 'test_has_visible_users.test_instance_id')
-            ->where('test_has_visible_users.user_id', '=', $this->currentUser->id)
-            ->where('ti.test_id', '=', request()->id)
-            ->where('ti.active_from', '<=', $now)
-            ->where('ti.active_to', '>=', $now)
-            ->exists();
+        return TestExecutionService::isTestVisibleForCurrentUser($this->currentUser->id, request()->testId, $now);
     }
 }
