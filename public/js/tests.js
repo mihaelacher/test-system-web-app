@@ -1,5 +1,6 @@
 const selectedQuestionsCacheKey = 'selected_question_ids';
 const selectedUsersCacheKey = 'selected_user_ids';
+const validDateFormat = 'DD.MM.YYYY HH:ii';
 
 let test = {
 
@@ -19,9 +20,31 @@ let test = {
                     }, {
                         data: 'max_duration',
                         name: 'max_duration'
-                    }]
+                    }, {
+                        data: 'operations',
+                        name: 'operations'
+                    }],
+                    initComplete: function () {
+                        test.populateTestModalWithInfoOnClick();
+                    }
                 }
             });
+        }
+    },
+
+    populateTestModalWithInfoOnClick: function () {
+        let modalBtn = $('.testInfoModalBtn');
+
+        if (modalBtn.length) {
+            modalBtn.on('click', function () {
+                $.ajax({
+                    method: 'GET',
+                    url: '/ajax/tests/' + $(this).data('test_id') + '/getModal'
+                })
+                    .success(function (responseHtml) {
+                        $('.modal-content').html(responseHtml);
+                    });
+            })
         }
     },
 
@@ -31,7 +54,7 @@ let test = {
         if (questionsTable.length) {
             let currentUrl = window.location.pathname;
             let isEditMode = currentUrl.indexOf('edit') !== -1;
-            let match = /tests\/(\d+)/.exec(window.location.pathname);
+            let match = /tests\/(\d+)/.exec(currentUrl);
 
             let ajaxUrl = match === null
                 ? '/ajax/questions/getQuestions'
@@ -180,22 +203,22 @@ let test = {
 
     addCustomDateValidationMethods: function () {
         $.validator.addMethod('validFormat', function (value, element) {
-            return moment(value, 'DD.MM.YYYY HH:ii').isValid();
+            return moment(value, validDateFormat).isValid();
         }, 'Date time format is not valid.');
 
         $.validator.addMethod('afterDate', function (value, element, params) {
             if ($(params).val() === '') {
                 return  true;
             }
-            return new Date(value) > new Date($(params).val());
-        }, 'Must be before active from date.');
+            return moment(value, validDateFormat).toDate() > moment($(params).val(), validDateFormat).toDate();
+        }, 'Must be after active from date.');
 
         $.validator.addMethod('beforeDate', function (value, element, params) {
             if ($(params).val() === '') {
                 return  true;
             }
-            return new Date(value) < new Date($(params).val());
-        }, 'Must be after active to date.');
+            return moment(value, validDateFormat).toDate() < moment($(params).val(), validDateFormat).toDate();
+        }, 'Must be before active to date.');
     },
 
     init: function () {

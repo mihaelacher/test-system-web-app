@@ -14,7 +14,7 @@ Route::group(['prefix' => 'testexecution/'], function() {
     Route::get('{id}/show', 'TestExecution\TestExecutionController@show');
     Route::get('{id}/evaluate', 'TestExecution\TestExecutionController@evaluate');
     Route::post('{id}/evaluate', 'TestExecution\TestExecutionController@submitEvaluation');
-    Route::get('{testId}/start', 'TestExecution\TestExecutionController@start');
+    Route::get('{id}/execute', 'TestExecution\TestExecutionController@execute');
     Route::post('{id}/submit', 'TestExecution\TestExecutionController@submit');
 });
 

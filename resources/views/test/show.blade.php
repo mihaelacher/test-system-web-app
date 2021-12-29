@@ -5,16 +5,12 @@
     @endphp
     <div class="form-container">
         <input id="js-test-id" type="hidden" value="{{ $testId }}">
-        @if($canEdit)
+        @can('update', $test)
             <a class="btn btn-success" href="/tests/{{ $testId }}/edit">Edit</a>
-            <a class="btn btn-danger" href="/tests/{{ $testId }}/delete" data-method="delete"
+            <a class="btn btn-danger" href="/tests/{{ $testId }}/delete" data-method="post"
                data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this test?">DELETE</a>
-        @endif
-        @if($isCurrentUserAdmin)
-            <a class="btn btn-secondary" href="/tests/{{ $testId }}/inviteUsers">Invite users to participate</a>
-        @elseif($showStartBtn)
-            <a class="btn btn-success" href="/testexecution/{{ $testId }}/start">Start</a>
-        @endif
+        @endcan
+        <a class="btn btn-secondary" href="/tests/{{ $testId }}/inviteUsers">Invite users to participate</a>
         <div class="row">
             <div class="form-group mt-3">
                 <label class="label-text" for="name">NAME</label>
@@ -28,9 +24,7 @@
                 <label class="label-text" for="name">MAX DURATION</label>
                 <p>{{ $test->max_duration }}</p>
             </div>
-            @if($isCurrentUserAdmin)
-                @include('question.blocks.index-table', ['tableId' => 'testQuestionsIndexTable'])
-            @endif
+            @include('question.blocks.index-table', ['showOperations' => false])
         </div>
     </div>
 @endsection

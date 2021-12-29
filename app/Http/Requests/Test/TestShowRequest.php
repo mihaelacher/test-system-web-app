@@ -3,13 +3,15 @@
 namespace App\Http\Requests\Test;
 
 use App\Http\Requests\MainGetRequest;
+use App\Models\Test\Test;
 
 class TestShowRequest extends MainGetRequest
 {
-
-    public function authorize()
+    /**
+     * @return bool
+     */
+    public function authorize(): bool
     {
-        // TODO: Implement authorize() method specific for Test
-        return true;
+       return $this->currentUser->can('view', Test::findOrFail(request()->id));
     }
 }

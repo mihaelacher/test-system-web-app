@@ -1,9 +1,9 @@
 @extends('content', ['title' => 'Test Execution'])
 @section('sub-content')
     <div class="form-container">
-        @if($showEvaluateBtn)
+        @can('evaluate', $testExecution)
             <a class="btn btn-success" href="/testexecution/{{ $testExecution->id }}/evaluate/">Evaluate</a>
-        @endif
+        @endcan
         <div class="row">
             <div class="form-group mt-3">
                 <label class="label-text">START TIME</label>
@@ -47,7 +47,7 @@
                 @else
                     @foreach($question->answers as $answer)
                         @php
-                            $testExecutionAnswers = explode(',', $question->answer_ids);
+                            $testExecutionAnswers = explode(',', $question->closed_question_answers);
                         @endphp
                         <div class="col-md-12">
                             <div class="form-group col-md-1 mt-3">

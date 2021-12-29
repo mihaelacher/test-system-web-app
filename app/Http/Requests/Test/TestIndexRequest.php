@@ -3,14 +3,12 @@
 namespace App\Http\Requests\Test;
 
 use App\Http\Requests\MainGetRequest;
+use App\Models\Test\Test;
 
 class TestIndexRequest extends MainGetRequest
 {
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
-        return !is_null($this->currentUser);
+        return $this->currentUser->can('viewAny', Test::class);
     }
 }

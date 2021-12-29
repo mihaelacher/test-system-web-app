@@ -7,7 +7,6 @@ use App\Http\Requests\MainFormRequest;
 use App\Models\Authorization\User;
 use App\Models\Question\QuestionType;
 use App\Models\Test\Test;
-use App\Models\Test\TestExecution;
 use App\Models\Test\TestHasVisibleUsers;
 use App\Models\Test\TestInstance;
 use App\Models\Test\TestQuestions;
@@ -28,15 +27,14 @@ class TestService
         try {
             DB::beginTransaction();
 
-            $testId = self::setTestAttributes($test, $request->name, $request->intro_text,
-                $request->max_duration, $request->is_visible_for_admins);
+            $testId = self::setTestAttributes($test, $request->name, $request->max_duration,
+                $request->is_public, $request->intro_text);
 
             if (!$testId) {
                 throw new TestUpdateException('Test couldn\'t be saved in DB!');
             }
 
-            self::mapQuestionToTest($testId,
-                array_unique(explode(',', $request->selected_question_ids ?? '')));
+            self::mapQuestionToTest($testId,$request->selected_question_ids);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -56,16 +54,16 @@ class TestService
     {
         $query = Test::query();
 
-        if ($currentUser->is_admin) {
+        // admins can see only public test or tests created by themselves
+        if ($currentUser->isAdmin()) {
             $query->where('created_by', '=', $currentUser->id)
-                ->orWhere('is_visible_for_admins', '=', 1);
+                ->orWhere('is_public', '=', 1);
         } else {
+            // users see only tests if there is existing test invitation for them
             $query->join('test_instances as ti', 'ti.test_id', '=', 'tests.id')
-                ->join('test_has_visible_users as thvu',
-                'thvu.test_instance_id', '=', 'ti.id')
+                ->join('test_has_visible_users as thvu', 'thvu.test_instance_id', '=', 'ti.id')
                 ->where('thvu.user_id', '=', $currentUser->id);
         }
-
         return $query->select(['tests.id', 'name', 'intro_text', 'max_duration']);
     }
 
@@ -109,33 +107,71 @@ class TestService
      * @param int $testId
      * @return mixed
      */
-    public static function doesTestHaveOpenQuestions(int $testId)
+    public static function doesTestHaveOpenQuestions(int $testInstanceId)
     {
         return Test::join('test_questions as tq', 'tq.test_id', '=', 'tests.id')
+            ->join('test_instances as ti', 'ti.test_id', '=', 'tests.id')
             ->join('questions as q', 'q.id', '=', 'tq.question_id')
-            ->where('tests.id', '=', $testId)
+            ->where('ti.id', '=', $testInstanceId)
             ->whereIn('q.question_type_id', QuestionType::OPEN_QUESTIONS)
             ->exists();
     }
 
     /**
+     * @param User $currentUser
      * @param int $testId
-     * @return bool
+     * @param bool $onlyActive
+     * @return mixed
      */
-    public static function hasTestQuestions(int $testId): bool
+    public static function findExistingTestInstanceInDB(User $currentUser, int $testId, bool $onlyActive = true)
     {
-        return TestQuestions::where('test_id', '=', $testId)->exists();
+        date_default_timezone_set('Europe/Sofia');
+        $now = Carbon::now();
+        $userId = $currentUser->id;
+
+        $query = TestInstance::join('test_has_visible_users as thvu', 'test_instances.id', '=', 'thvu.test_instance_id')
+            ->where('test_instances.test_id', '=', $testId)
+            ->where('thvu.user_id', '=', $userId);
+
+        if ($onlyActive) {
+            $query->leftJoin('test_executions as te', function ($join) use ($userId) {
+                $join->on('te.test_instance_id', '=', 'test_instances.id')
+                    ->where('te.user_id', '=', $userId);
+            })
+                ->where('test_instances.active_from', '<=', $now)
+                ->where('test_instances.active_to', '>=', $now)
+                ->whereNull('te.id');
+        }
+        return $query->select('test_instances.*')
+            ->first();
     }
 
     /**
-     * @param Test $test
-     * @param int $currentUserId
-     * @return bool
+     * @param int $testInstanceId
+     * @return mixed
+     * @throws \Exception
      */
-    public static function canTestBeModified(Test $test, int $currentUserId): bool
+    public static function getTestMaxDurationByTestInstanceId(int $testInstanceId)
     {
-        return !TestExecution::where('test_id', '=', $test->id)->exists()
-            && $test->created_by === $currentUserId;
+        $test = self::findTestByTestInstance($testInstanceId);
+
+        if (is_null($test)) {
+            throw new \Exception('Error, no test in DB found.');
+        }
+
+        return $test->max_duration;
+    }
+
+    /**
+     * @param int $testInstanceId
+     * @return mixed
+     */
+    public static function findTestByTestInstance(int $testInstanceId)
+    {
+        return Test::join('test_instances as ti', 'ti.test_id', '=', 'tests.id')
+            ->where('ti.id', '=', $testInstanceId)
+            ->select('tests.*')
+            ->first();
     }
 
     /**
@@ -159,18 +195,18 @@ class TestService
     /**
      * @param Test $test
      * @param string $name
-     * @param string $introText
      * @param int $maxDuration
-     * @param int $isVisibleForAdmins
+     * @param int $isPublic
+     * @param string|null $introText
      * @return int
      */
-    private static function setTestAttributes(Test $test, string $name, string $introText,
-                                              int $maxDuration, int $isVisibleForAdmins): int
+    private static function setTestAttributes(Test $test, string $name, int $maxDuration,
+                                              int $isPublic, ?string $introText = null): int
     {
         $test->name = $name;
         $test->intro_text = $introText;
         $test->max_duration = $maxDuration;
-        $test->is_visible_for_admins = $isVisibleForAdmins;
+        $test->is_public = $isPublic;
         $test->save();
 
         return $test->id;

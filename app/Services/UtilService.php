@@ -12,6 +12,6 @@ class UtilService
      */
     public static function formatDate(string $stringDate): string
     {
-        return Carbon::parse($stringDate)->format('d.m.Y H:i:s');
+        return Carbon::parse($stringDate)->format('d.m.Y H:i');
     }
 }

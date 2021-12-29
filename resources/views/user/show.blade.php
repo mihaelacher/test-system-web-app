@@ -3,7 +3,7 @@
     <div class="form-container">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <a class="btn btn-success" href="/users/{{ $user->id }}/edit">EDIT</a>
-        <a class="btn btn-danger" href="/users/{{ $user->id }}/delete" data-method="delete"
+        <a class="btn btn-danger" href="/users/{{ $user->id }}/delete" data-method="post"
            data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this user?">DELETE</a>
         <a class="btn btn-secondary" href="/users/{{ $user->id }}/changePassword">CHANGE PASSWORD</a>
         <div class="row">

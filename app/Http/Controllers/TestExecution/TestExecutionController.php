@@ -9,19 +9,16 @@ use App\Http\Requests\TestExecution\TestExecutionShowRequest;
 use App\Http\Requests\TestExecution\TestExecutionStartRequest;
 use App\Http\Requests\TestExecution\TestExecutionSubmitEvaluationRequest;
 use App\Http\Requests\TestExecution\TestExecutionSubmitRequest;
-use App\Models\Test\Test;
 use App\Models\Test\TestExecution;
 use App\Services\TestExecutionService;
 use App\Services\TestService;
+use App\Util\MessageUtil;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Session;
 use function redirect;
 use function view;
 
 class TestExecutionController extends AuthController
 {
-
     /**
      * @method GET
      * @uri /testexecution/index
@@ -43,43 +40,35 @@ class TestExecutionController extends AuthController
     public function show(TestExecutionShowRequest $request, $id)
     {
         $testExecution = TestExecution::findOrFail($id);
-        $canCurrentUserEvaluate = $request->currentUser->is_admin
-            && TestService::doesTestHaveOpenQuestions($testExecution->test_id);
 
         return view('test-execution.show')
-            ->with('showEvaluateBtn', $canCurrentUserEvaluate)
             ->with('testExecution', $testExecution)
-            ->with('questions', TestExecutionService::getTestQuestions($id));
+            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($testExecution->test_instance_id, $testExecution->id));
     }
 
     /**
-     * @uri /testexecution/{testId}/start
+     * @uri /testexecution/{id}/execute
      * @method GET
      * @param TestExecutionStartRequest $request
-     * @param $testId
+     * @param $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @throws \Exception
      */
-    public function start(TestExecutionStartRequest $request, $testId)
+    public function execute(TestExecutionStartRequest $request, $id)
     {
         date_default_timezone_set('Europe/Sofia');
-        $currentUserId = $request->currentUser->id;
-        $testExecution = TestExecutionService::findTestExecutionInDb($currentUserId, $testId, true);
-        $testMaxDuration = Test::findOrFail($testId)->max_duration * 60;
+        $testExecution = TestExecution::findOrFail($id);
+        $testInstanceId = $testExecution->test_instance_id;
 
-        $timeRemainingInSec = !$testExecution
-            ? $testMaxDuration
-            : ($testMaxDuration - Carbon::now()->diffInSeconds(Carbon::parse($testExecution->start_time)));
-
-        if (!$testExecution) {
-            $testExecution = TestExecutionService::startTestExecution($currentUserId, $testId);
-        }
+        $testMaxDuration = TestService::getTestMaxDurationByTestInstanceId($testInstanceId) * 60;
+        $timeRemainingInSec = $testMaxDuration - Carbon::parse($testExecution->start_time)->diffInSeconds(Carbon::now());
 
         return view('test-execution.execute')
-            ->with('remainingTime', gmdate('H:i:s', $timeRemainingInSec))
             ->with('timeRemainingInSec', $timeRemainingInSec)
             ->with('testExecutionId', $testExecution->id)
-            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($testId));
+            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($testInstanceId, $testExecution->id));
     }
+
 
     /**
      * @method POST
@@ -91,6 +80,8 @@ class TestExecutionController extends AuthController
     public function submit(TestExecutionSubmitRequest $request, $id)
     {
         TestExecutionService::updateTestExecution(TestExecution::findOrFail($id));
+
+        MessageUtil::success('You\'ve successfully submitted the test!');
 
         return redirect('/tests/index');
     }
@@ -108,7 +99,8 @@ class TestExecutionController extends AuthController
 
         return view('test-execution.evaluate')
             ->with('testExecutionId', $testExecution->id)
-            ->with('questions', TestExecutionService::getTestQuestions($testExecution->test_id, true));
+            ->with('questions', TestExecutionService::getExecutionQuestionAnswers($testExecution->test_instance_id,
+                $testExecution->id, true));
     }
 
     /**
@@ -123,6 +115,9 @@ class TestExecutionController extends AuthController
         $testExecution = TestExecution::findOrFail($id);
         $testExecution->result_points += array_sum($request->points);
         $testExecution->save();
+
+        MessageUtil::success('You\'ve successfully evaluated the test!');
+
         return redirect('/testexecution/index');
     }
 }

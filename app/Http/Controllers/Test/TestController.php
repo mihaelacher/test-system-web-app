@@ -12,7 +12,6 @@ use App\Http\Requests\Test\TestShowRequest;
 use App\Http\Requests\Test\TestStoreRequest;
 use App\Http\Requests\Test\TestUpdateRequest;
 use App\Models\Test\Test;
-use App\Services\TestExecutionService;
 use App\Services\TestService;
 use App\Util\MessageUtil;
 use Carbon\Carbon;
@@ -27,8 +26,7 @@ class TestController extends AuthController
      */
     public function index(TestIndexRequest $request)
     {
-        return view('test.index')
-            ->with('showCreateBtn', $request->currentUser->is_admin);
+        return view('test.index');
     }
 
     /**
@@ -40,17 +38,8 @@ class TestController extends AuthController
      */
     public function show(TestShowRequest $request, $id)
     {
-        $currentUser = $request->currentUser;
-        $isCurrentUserAdmin = $currentUser->is_admin;
-        $test = Test::findOrFail($id);
-        $showTestExecuteStartBtn = !$isCurrentUserAdmin
-            && TestExecutionService::isTestActiveForCurrentUser($id, $currentUser->id);
-
         return view('test.show')
-            ->with('test', $test)
-            ->with('isCurrentUserAdmin', $isCurrentUserAdmin)
-            ->with('showStartBtn', $showTestExecuteStartBtn)
-            ->with('canEdit', TestService::canTestBeModified($test, $currentUser->id));
+            ->with('test', Test::findOrFail($id));
     }
 
     /**
@@ -109,7 +98,7 @@ class TestController extends AuthController
     }
 
     /**
-     * @method DELETE
+     * @method POST
      * @uri tests/{id}/delete
      * @param TestDestroyRequest $request
      * @param $id
@@ -149,10 +138,9 @@ class TestController extends AuthController
         $activeFrom = Carbon::parse($request->active_from);
         $activeTo = Carbon::parse($request->active_to);
 
-        TestService::createTestInstance($id, $activeFrom, $activeTo,
-            explode(',',  $request->selected_user_ids ?? ''));
+        TestService::createTestInstance($id, $activeFrom, $activeTo, $request->selected_user_ids);
 
-        MessageUtil::success('You\'ve successfully invited users to the the test!');
+        MessageUtil::success('You\'ve successfully invited users to the test!');
 
         return redirect('/tests/index');
     }

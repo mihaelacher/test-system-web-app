@@ -8,7 +8,9 @@ use App\Models\MainModel;
  * App\Models\Test\TestExecutionAnswer
  *
  * @property int $id
- * @property int $test_question_answer_id
+ * @property int $test_execution_id
+ * @property int $question_id
+ * @property int $question_answer_id
  * @property float $response_numeric
  * @property string $response_text_short
  * @property string $response_text_long

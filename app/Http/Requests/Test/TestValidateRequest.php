@@ -14,16 +14,26 @@ class TestValidateRequest extends MainFormRequest
         return [
             'name' => 'required',
             'max_duration' => 'required|numeric',
+            'selected_question_ids' => 'min:1'
         ];
     }
 
-    /**
-     * @param array $input
-     * @return TestValidateRequest
-     */
-    public function replace(array $input): TestValidateRequest
+    /** @return string[] */
+    public function messages(): array
     {
-        $input['selected_question_ids'] = explode(',', request()->selected_question_ids ?? '');
-        return parent::replace($input);
+        return [
+            'selected_question_ids.min' => 'Please, choose at least one question for the test.'
+        ];
+    }
+
+    /** @return void */
+    public function prepareForValidation(): void
+    {
+        $input = $this->all();
+        $input['selected_question_ids'] = empty($this->selected_question_ids)
+            ? []
+            : explode(',', $this->selected_question_ids);
+
+        $this->replace($input);
     }
 }

@@ -22,3 +22,8 @@ a:hover {
     color: #70d173;
     text-decoration: none;
 }
+
+.btn-sm, .btn-xs {
+    margin-left: 6px;
+    margin-right: 5px;
+}

@@ -22,16 +22,16 @@
                            value="{{ old('max_duration') ?? $test->max_duration }}">
                 </div>
                 @php
-                    $isVisibleForAdmins = old('is_visible_for_admins') ?? $test->is_visible_for_admins;
+                    $isVisibleForAdmins = old('is_public') ?? $test->is_public;
                 @endphp
                 <div class=" form-group mt-3">
-                    <label class="label-text" for="is_visible_for_admins">IS PUBLIC</label>
-                    <select class="form-control" name="is_visible_for_admins">
+                    <label class="label-text" for="is_public">IS PUBLIC</label>
+                    <select class="form-control" name="is_public">
                         <option value="0" @if(!$isVisibleForAdmins) selected @endif>NO</option>
                         <option value="1" @if($isVisibleForAdmins) selected @endif>YES</option>
                     </select>
                 </div>
-                @include('question.blocks.index-table')
+                @include('question.blocks.index-table', ['showOperations' => false])
             </div>
         </form>
     </div>

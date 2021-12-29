@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Test;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainGetRequest;
+use App\Models\Test\Test;
 
 class TestCreateRequest extends MainGetRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('create', Test::class);
+    }
 }

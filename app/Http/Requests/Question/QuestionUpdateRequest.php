@@ -2,20 +2,12 @@
 
 namespace App\Http\Requests\Question;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
+use App\Models\Question\Question;
 
 class QuestionUpdateRequest extends ValidateQuestionRequest
 {
-    use AuthorizeAdminRequestTrait {
-        authorize as authorizeAdmin;
-    }
-    use QuestionModifyRequestTrait;
-
-    /**
-     * @return bool
-     */
     public function authorize(): bool
     {
-        return $this->authorizeAdmin() && $this->questionModifyAuthorize();
+        return $this->currentUser->can('update', Question::findOrFail(request()->id));
     }
 }

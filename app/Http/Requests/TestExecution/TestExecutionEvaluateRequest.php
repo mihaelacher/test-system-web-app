@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\TestExecution;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainGetRequest;
+use App\Models\Test\TestExecution;
 
 class TestExecutionEvaluateRequest extends MainGetRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('evaluate', TestExecution::findOrFail(request()->id));
+    }
 }

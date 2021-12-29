@@ -2,13 +2,16 @@
 
 namespace App\Http\Requests\User;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainFormRequest;
+use App\Models\Authorization\User;
 use Illuminate\Support\Facades\Validator;
 
 class UserStorePasswordRequest extends MainFormRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('update', User::findOrFail(request()->id));
+    }
 
     /**
      * @return array

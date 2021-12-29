@@ -16,7 +16,7 @@ Route::group(['prefix' => 'questions/'], function () {
     Route::get('{id}/edit', 'Question\QuestionController@edit');
     Route::post('{id}/update', 'Question\QuestionController@update');
     Route::get('{id}', 'Question\QuestionController@show');
-    Route::delete('{id}/delete', 'Question\QuestionController@delete');
+    Route::post('{id}/delete', 'Question\QuestionController@delete');
 });
 
 Route::group(['prefix' => 'ajax/'], function () {

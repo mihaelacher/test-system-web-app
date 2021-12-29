@@ -6,6 +6,9 @@
             <th>Username</th>
             <th>Email</th>
             <th>Admin</th>
+            @if($showOperations)
+                <th>Operations</th>
+            @endif
         </tr>
         </thead>
         <tbody>

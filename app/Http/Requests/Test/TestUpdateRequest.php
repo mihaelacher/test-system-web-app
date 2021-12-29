@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Test;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
-use App\Http\Requests\MainFormRequest;
+use App\Models\Test\Test;
 
 class TestUpdateRequest extends TestValidateRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('update', Test::findOrFail(request()->id));
+    }
 }

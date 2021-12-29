@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Question;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainGetRequest;
+use App\Models\Question\Question;
 
 class QuestionCreateRequest extends MainGetRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('create', Question::class);
+    }
 }

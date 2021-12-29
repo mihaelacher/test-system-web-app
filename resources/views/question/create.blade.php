@@ -3,10 +3,10 @@
     @php
         $multipleChoiceType = \App\Models\Question\QuestionType::MULTIPLE_CHOICE;
         $singleChoiceType = \App\Models\Question\QuestionType::SINGLE_CHOICE;
-        $questionTypeId = (int) old('type') ?? null;
+        $questionTypeId = old('type') ?? null;
         $isClosed = is_null($questionTypeId)
         ? true
-        : ($questionTypeId === $singleChoiceType || $questionTypeId === $multipleChoiceType);
+        : ((int) $questionTypeId === $singleChoiceType || (int) $questionTypeId === $multipleChoiceType);
     @endphp
     <input id="js-single-choice-type" type="hidden" value="{{ $singleChoiceType }}">
     <input id="js-multiple-choice-type" type="hidden" value="{{ $multipleChoiceType }}">

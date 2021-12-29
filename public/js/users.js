@@ -4,10 +4,18 @@ let user = {
         let usersTable = $('#usersIndexTable');
 
         if (usersTable.length) {
+            let columns = utils.getUsersDatatableCols();
+
+            let operationsCol = {
+                data: 'operations',
+                name: 'operations'
+            }
+            columns.push(operationsCol);
+
             usersTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
-                    ajax: '/ajax/users/getUsers',
-                    columns: utils.getUsersDatatableCols(),
+                    ajax: '/ajax/users/getUsers?showOperations=1',
+                    columns: columns,
                 }
             });
         }

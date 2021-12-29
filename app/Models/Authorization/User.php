@@ -3,13 +3,14 @@
 namespace App\Models\Authorization;
 
 use App\Models\MainModel;
-use App\Models\ModifiableModel;
 use Carbon\Carbon;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 
 /**
@@ -28,9 +29,9 @@ use Illuminate\Notifications\Notifiable;
  * @property int $created_by
  * @property int $updated_by
  */
-class User extends MainModel implements AuthenticatableContract, CanResetPasswordContract
+class User extends MainModel implements AuthenticatableContract, CanResetPasswordContract, AuthorizableContract
 {
-    use SoftDeletes, Authenticatable, CanResetPassword, Notifiable;
+    use SoftDeletes, Authenticatable, CanResetPassword, Notifiable, Authorizable;
 
     protected $table = 'users';
 
@@ -55,4 +56,12 @@ class User extends MainModel implements AuthenticatableContract, CanResetPasswor
     protected $hidden = [
         'password'
     ];
+
+    /**
+     * @return int
+     */
+    public function isAdmin(): int
+    {
+        return $this->is_admin;
+    }
 }

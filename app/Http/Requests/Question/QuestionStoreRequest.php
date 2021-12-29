@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Question;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
+use App\Models\Question\Question;
 
 class QuestionStoreRequest extends ValidateQuestionRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('create', Question::class);
+    }
 }

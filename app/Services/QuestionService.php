@@ -7,7 +7,6 @@ use App\Http\Requests\MainFormRequest;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionAnswer;
 use App\Models\Question\QuestionType;
-use App\Models\Test\TestExecution;
 use App\Models\Test\TestQuestions;
 use App\Util\LogUtil;
 use App\Util\MessageUtil;
@@ -78,6 +77,15 @@ class QuestionService
     }
 
     /**
+     * @param int $questionTypeId
+     * @return bool
+     */
+    private static function isQuestionClosed(int $questionTypeId): bool
+    {
+        return in_array($questionTypeId, QuestionType::CLOSED_QUESTIONS);
+    }
+
+    /**
      * @param Question $question
      * @param string $text
      * @param float $points
@@ -139,26 +147,5 @@ class QuestionService
         if ($questionId) {
             QuestionAnswer::where('question_id', '=', $questionId)->delete();
         }
-    }
-
-    /**
-     * @param int $questionTypeId
-     * @return bool
-     */
-    public static function isQuestionClosed(int $questionTypeId): bool
-    {
-        return in_array($questionTypeId, QuestionType::CLOSED_QUESTIONS);
-    }
-
-    /**
-     * @param int $questionId
-     * @return mixed
-     */
-    public static function belongsQuestionToTestExecution(int $questionId)
-    {
-        return TestExecution::join('tests as t', 't.id', '=', 'test_executions.test_id')
-            ->join('test_questions as tq', 'tq.test_id', '=', 't.id')
-            ->where('tq.question_id', '=', $questionId)
-            ->exists();
     }
 }

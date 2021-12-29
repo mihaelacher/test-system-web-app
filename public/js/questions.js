@@ -6,10 +6,18 @@ let question = {
         let questionsTable = $('#questionsIndexTable');
 
         if (questionsTable.length) {
+            let columns = utils.getQuestionDatatableCols();
+
+            let operationsCol = {
+                data: 'operations',
+                name: 'operations'
+            }
+            columns.push(operationsCol);
+
             questionsTable.DataTable({
                 ...utils.getCommonDatatableOptions(), ...{
                     ajax: '/ajax/questions/getQuestions',
-                    columns: utils.getQuestionDatatableCols()
+                    columns: columns
                 }
             });
         }

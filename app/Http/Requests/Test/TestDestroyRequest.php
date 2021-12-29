@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Test;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
 use App\Http\Requests\MainFormRequest;
+use App\Models\Test\Test;
 
 class TestDestroyRequest extends MainFormRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('delete', Test::findOrFail(request()->id));
+    }
 }

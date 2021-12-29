@@ -3,7 +3,6 @@
 namespace App\Models\Test;
 
 use App\Models\MainModel;
-use App\Models\ModifiableModel;
 use Carbon\Carbon;
 
 /**
@@ -13,7 +12,7 @@ use Carbon\Carbon;
  * @property string $name
  * @property string $intro_text
  * @property int $max_duration
- * @property int $is_visible_for_admins
+ * @property int $is_public
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon $deleted_at

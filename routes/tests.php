@@ -19,11 +19,12 @@ Route::group(['prefix' => 'tests/'], function () {
     Route::get('{id}', 'Test\TestController@show');
     Route::get('{id}/inviteUsers', 'Test\TestController@inviteUsers');
     Route::post('{id}/storeInvitations', 'Test\TestController@storeInvitations');
-    Route::delete('{id}/delete', 'Test\TestController@destroy');
+    Route::post('{id}/delete', 'Test\TestController@destroy');
 });
 
 Route::group(['prefix' => 'ajax/'], function () {
     Route::get('tests/getTests', 'Test\AjaxController@getTestsDataTable');
     Route::get('tests/{id}/getTestQuestions', 'Test\AjaxController@getTestQuestions');
+    Route::get('tests/{id}/getModal', 'Test\AjaxController@getModal');
 });
 

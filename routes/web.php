@@ -24,5 +24,6 @@ Route::group(['prefix' => 'auth/'], function () {
 include('users.php');
 include('questions.php');
 include('tests.php');
+include('testinstance.php');
 include('testexecution.php');
 

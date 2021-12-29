@@ -15,7 +15,7 @@ use Carbon\Carbon;
  * @property string $creator_comment
  * @property int $executed_questions_count
  * @property int $correct_questions_count
- * @property int $test_id
+ * @property int $test_instance_id
  * @property int $user_id
  */
 class TestExecution extends MainModel

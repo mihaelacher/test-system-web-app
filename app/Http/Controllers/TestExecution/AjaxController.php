@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\TestExecution;
 
+use App\Exceptions\TestExecutionAnswerUpdateException;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Requests\TestExecution\TestExecutionIndexRequest;
 use App\Http\Requests\TestExecution\TestExecutionSubmitAnswerRequest;
+use App\Models\Question\QuestionType;
 use App\Services\TestExecutionService;
-use App\Util\MessageUtil;
+use App\Util\LogUtil;
 use Yajra\DataTables\DataTables;
 
 class AjaxController extends AuthController
@@ -44,17 +46,30 @@ class AjaxController extends AuthController
         $testExecutionId = $request->id;
         $questionId = $request->questionId;
         $inputText = $request->inputValue;
+        $questionTypeId = $request->questionTypeId;
 
-        $existingTestExecutionAnswer =
-            TestExecutionService::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId);
+        try {
+            $testExecutionAnswer =
+                TestExecutionService::getTestExecutionAnswer($testExecutionId, $questionId);
 
-        if ($existingTestExecutionAnswer) {
-            $existingTestExecutionAnswer->response_text_short = $inputText;
-            $existingTestExecutionAnswer->save();
-        } else {
-            TestExecutionService::insertTestExecutionAnswer($testExecutionId, $questionId, null, $inputText);
+            switch ($questionTypeId) {
+                case QuestionType::TEXT_SHORT:
+                    $testExecutionAnswer->response_text_short = $inputText;
+                    break;
+                case QuestionType::TEXT_LONG:
+                    $testExecutionAnswer->response_text_long = $inputText;
+                    break;
+                case QuestionType::NUMERIC:
+                    $testExecutionAnswer->response_numeric = $inputText;
+                    break;
+            }
+
+            $testExecutionAnswer->save();
+            return 1;
+        } catch (TestExecutionAnswerUpdateException $e) {
+            LogUtil::logError($e->getMessage());
+            return 0;
         }
-        return 1;
     }
 
     /**
@@ -70,21 +85,33 @@ class AjaxController extends AuthController
         $answerId = $request->answerId;
         $isChecked = $request->isChecked;
 
-        $existingTestExecutionAnswer =
-            TestExecutionService::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId, $answerId);
+        try {
+            $existingTestExecutionAnswer =
+                TestExecutionService::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId, $answerId);
 
-        if ($existingTestExecutionAnswer && !$isChecked) {
-            $existingTestExecutionAnswer->delete();
-        } else if(
-            $isChecked
-            && is_null($existingTestExecutionAnswer)
-            && TestExecutionService::isMaxMarkableAnswersLimitExceeded($testExecutionId, $questionId)
-        ) {
-            return 0;
+            // case 1: user unchecked already submitted answer
+            if (!is_null($existingTestExecutionAnswer) && !$isChecked) {
+                // delete the connected answer to db
+                $existingTestExecutionAnswer->delete();
+            } // case 2: user tries to mark more correct answers than allowed
+            else if (
+                $isChecked
+                && is_null($existingTestExecutionAnswer)
+                && TestExecutionService::isMaxMarkableAnswersLimitExceeded($testExecutionId, $questionId)
+            ) {
+                // flash error message
+                return 0;
+            } // case 3: no answers given, insert the new one
+            else if (is_null($existingTestExecutionAnswer)) {
+                $answer = TestExecutionService::createTestExecutionAnswer($testExecutionId, $questionId);
+                $answer->question_answer_id = $answerId;
+                $answer->save();
+            }
+        } catch (TestExecutionAnswerUpdateException $e) {
+            LogUtil::logError($e->getMessage());
+            return -1;
         }
-        else if (is_null($existingTestExecutionAnswer)){
-            TestExecutionService::insertTestExecutionAnswer($testExecutionId, $questionId, $answerId);
-        }
+        // flash success message
         return 1;
     }
 }

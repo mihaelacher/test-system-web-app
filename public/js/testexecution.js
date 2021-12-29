@@ -1,8 +1,9 @@
-var testCountDownTimer = 0;
-var timeRemainingInSec = $('#timeRemainingInSec').val();
-var testExecution = {
+let testCountDownTimer = 0;
+let timeRemainingInSec = $('#timeRemainingInSec').val();
+let testExecution = {
+
     loadTestExecutions: function () {
-        var testExecutionsTable = $('#testExecutionsIndexTable');
+        let testExecutionsTable = $('#testExecutionsIndexTable');
 
         if (testExecutionsTable.length) {
             testExecutionsTable.DataTable({
@@ -25,28 +26,31 @@ var testExecution = {
             });
         }
     },
+
     initAnsweredQuestionHandler: function () {
         $('.js-question-answers').on('change', function () {
-            var $this = $(this);
-            var testExecutionId = $('#testExecutionId').val();
-            var data = {
+            let testExecutionId = /testexecution\/(\d+)/.exec(window.location.pathname)[1];
+            let $this = $(this);
+            let data = {
                 _token: $("input[name='_token']").val(),
                 questionId: $this.data('question_id'),
             }
 
             if ($this.is(':checkbox') || $this.is(':radio')) {
-                var isChecked = $this.is(':checked');
+                let isChecked = $this.is(':checked');
                 data['answerId'] = $this.data('answer_id');
                 data['isChecked'] = isChecked ? 1 : 0;
 
                 testExecution.triggerQuestionAnswerAjaxCall(testExecutionId, data, $this, isChecked);
             } else {
                 data['inputValue'] = $this.val();
+                data['questionTypeId'] = $this.data('question_type_id');
 
                 testExecution.triggerOpenQuestionAjaxCall(testExecutionId, data, $this);
             }
         });
     },
+
     triggerOpenQuestionAjaxCall: function (testExecutionId, data, element) {
         $.ajax({
             method: 'POST',
@@ -61,9 +65,10 @@ var testExecution = {
             }
         })
             .error(function () {
-                utils.showToastrMessage('Time is out!', 'error');
+                utils.showToastrMessage('Something went wrong!', 'error');
             });
     },
+
     triggerQuestionAnswerAjaxCall: function (testExecutionId, data, checkbox, isChecked) {
         $.ajax({
             method: 'POST',
@@ -74,19 +79,22 @@ var testExecution = {
             if (parseInt(response) === 0) {
                 utils.showToastrMessage('You\'ve reached answers limit!', 'error');
                 checkbox.prop('checked', !isChecked);
-            } else {
+            } else if (parseInt(response) === 1) {
                 utils.showToastrMessage('You\'ve successfully submitted the answer.', 'success');
+            } else {
+                utils.showToastrMessage('Something went wrong!', 'error');
             }
         })
             .error(function () {
                 utils.showToastrMessage('Time is out!', 'error');
             });
     },
+
     initTestCountDown: function () {
-        var testCountDown = $('#testCountDown');
+        let testCountDown = $('#testCountDown');
 
         if (testCountDown.length) {
-            var executionTimeRemainingInSec = Math.ceil(parseInt(timeRemainingInSec));
+            let executionTimeRemainingInSec = Math.ceil(parseInt(timeRemainingInSec));
 
             testCountDownTimer = setInterval(function timer() {
                 testCountDown.text(testExecution.getCountdownTimeText(executionTimeRemainingInSec));
@@ -99,18 +107,21 @@ var testExecution = {
             }, 1000);
         }
     },
+
     getCountdownTimeText: function (timeInSec) {
-        var hours = Math.floor(timeInSec / 3600);
-        var minutes = Math.floor(timeInSec % 3600 / 60);
-        var seconds = Math.floor(timeInSec % 3600 % 60);
+        let hours = Math.floor(timeInSec / 3600);
+        let minutes = Math.floor(timeInSec % 3600 / 60);
+        let seconds = Math.floor(timeInSec % 3600 % 60);
         hours = hours < 0 ? '00' : (hours < 10 ? '0' + hours : hours);
         minutes = minutes < 0 ? '00' : (minutes < 10 ? '0' + minutes : minutes);
         seconds = seconds < 0 ? '00' : (seconds < 10 ? '0' + seconds : seconds);
 
         return hours + ':' + minutes + ':' + seconds;
     },
+
     init: function () {
         this.loadTestExecutions();
+
         this.initAnsweredQuestionHandler();
         this.initTestCountDown();
     }

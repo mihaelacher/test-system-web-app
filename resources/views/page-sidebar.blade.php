@@ -33,10 +33,14 @@
 
             <nav id="navbar" class="navbar">
                 <ul>
-                    @if(\Illuminate\Support\Facades\Auth::user()->is_admin)
+                    @can('viewAny', \App\Models\Question\Question::class)
                         <li><a class="nav-link scrollto" href="/questions/index">QUESTIONS</a></li>
+                    @endcan
+
+                    @can('viewAny', \App\Models\Authorization\User::class)
                         <li><a class="nav-link scrollto" href="/users/index">USERS</a></li>
-                    @endif
+                    @endcan
+
                     <li><a class="nav-link scrollto " href="/tests/index">TESTS</a></li>
                     <li><a class="nav-link scrollto" href="/testexecution/index">EXECUTED TESTS</a></li>
                     {{-- TODO <li><a class="nav-link scrollto" href="#contact">Profile</a></li>--}}

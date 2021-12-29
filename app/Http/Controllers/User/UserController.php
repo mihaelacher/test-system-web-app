@@ -99,7 +99,7 @@ class UserController extends AuthController
     }
 
     /**
-     * @method DELETE
+     * @method POST
      * @uri users/{id}/delete
      * @param UserDestroyRequest $request
      * @param $id

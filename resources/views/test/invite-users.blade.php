@@ -42,7 +42,7 @@
                     </div>
                 </div>
             </div>
-            @include('user.blocks.index-table')
+            @include('user.blocks.index-table', ['showOperations' => false])
         </form>
     </div>
 @endsection

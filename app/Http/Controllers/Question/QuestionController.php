@@ -38,12 +38,9 @@ class QuestionController extends AuthController
     public function show(QuestionShowRequest $request, int $id)
     {
         $question = Question::findOrFail($id);
-        $canEdit = $question->created_by === $request->currentUser->id
-            && !QuestionService::belongsQuestionToTestExecution($id);
 
         return view('question.show')
-            ->with('question', $question)
-            ->with('canEdit', $canEdit);
+            ->with('question', $question);
     }
 
     /**
@@ -82,11 +79,9 @@ class QuestionController extends AuthController
      */
     public function edit(QuestionEditRequest $request, $id)
     {
-      //  dd(old('value'));
       return view('question.edit')
             ->with('questionTypes', QuestionType::all()->sortBy('id'))
-            ->with('question', Question::findOrFail($id))
-            ->with('canEdit', QuestionService::belongsQuestionToTestExecution($id));
+            ->with('question', Question::findOrFail($id));
     }
 
     /**
@@ -106,7 +101,7 @@ class QuestionController extends AuthController
     }
 
     /**
-     * @method DELETE
+     * @method POST
      * @uri /questions/{id}/delete
      * @param QuestionDestroyRequest $request
      * @param $id

@@ -3,17 +3,11 @@
 namespace App\Http\Requests\TestExecution;
 
 use App\Http\Requests\MainGetRequest;
-use App\Models\Test\TestHasVisibleUsers;
-use App\Services\TestExecutionService;
-use Carbon\Carbon;
-
+use App\Models\Test\TestExecution;
 class TestExecutionStartRequest extends MainGetRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
-        date_default_timezone_set('Europe/Sofia');
-        $now = Carbon::now();
-
-        return TestExecutionService::isTestVisibleForCurrentUser($this->currentUser->id, request()->testId, $now);
+        return $this->currentUser->can('execute', TestExecution::findOrFail(request()->id));
     }
 }

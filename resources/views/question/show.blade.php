@@ -5,11 +5,11 @@
         $isSingleChoiceQuestion = $question->question_type_id === \App\Models\Question\QuestionType::SINGLE_CHOICE;
     @endphp
     <div class="form-container">
-        @if($canEdit)
+        @can('update', $question)
             <a class="btn-success btn" href="/questions/{{ $question->id }}/edit">EDIT</a>
-            <a class="btn btn-danger" href="/questions/{{ $question->id }}/delete" data-method="delete"
+            <a class="btn btn-danger" href="/questions/{{ $question->id }}/delete" data-method="post"
                data-token="{{csrf_token()}}" data-confirm="Are you sure, you want to delete this question?">DELETE</a>
-        @endif
+        @endcan
         <div class="row">
             <div class="form-group mt-3">
                 <label class="label-text">TEXT</label>

@@ -6,6 +6,9 @@
             <th>Question</th>
             <th>Points</th>
             <th>Type</th>
+            @if($showOperations)
+                <th>Operations</th>
+            @endif
         </tr>
         </thead>
         <tbody>

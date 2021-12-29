@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Test;
 
-use App\Http\Requests\AuthorizeAdminRequestTrait;
+use App\Models\Test\Test;
 
 class TestStoreRequest extends TestValidateRequest
 {
-    use AuthorizeAdminRequestTrait;
+    public function authorize(): bool
+    {
+        return $this->currentUser->can('create', Test::class);
+    }
 }
