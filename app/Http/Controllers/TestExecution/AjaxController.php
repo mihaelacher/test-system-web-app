@@ -52,6 +52,7 @@ class AjaxController extends AuthController
             $testExecutionAnswer =
                 TestExecutionService::getTestExecutionAnswer($testExecutionId, $questionId);
 
+            // insert answer in db based on question type
             switch ($questionTypeId) {
                 case QuestionType::TEXT_SHORT:
                     $testExecutionAnswer->response_text_short = $inputText;

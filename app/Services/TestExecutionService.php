@@ -73,8 +73,12 @@ class TestExecutionService
         $query = TestExecution::join('test_instances as ti', 'ti.id', '=', 'test_executions.test_instance_id')
             ->join('tests as t', 't.id', '=', 'ti.test_id');
 
+        // case 1: user can see only their own test executions
         if (!$currentUser->isAdmin()) {
             $query->where('test_executions.user_id', '=', $currentUser->id);
+        } else {
+            // case 2: admins can see only created from them test instance's executions
+            $query->where('ti.created_by', '=', $currentUser->id);
         }
 
         return $query;
