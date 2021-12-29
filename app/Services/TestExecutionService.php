@@ -4,179 +4,76 @@ namespace App\Services;
 
 use App\Models\Authorization\User;
 use App\Models\Question\Question;
-use App\Models\Question\QuestionAnswer;
 use App\Models\Question\QuestionType;
+use App\Models\Test\Test;
 use App\Models\Test\TestExecution;
 use App\Models\Test\TestExecutionAnswer;
-use App\Models\Test\TestHasVisibleUsers;
-use App\Models\Test\TestQuestions;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class TestExecutionService
 {
     /**
-     * @param int $testId
-     * @param int $currentUserId
-     * @return bool
+     * @param TestExecution $testExecution
+     * @return void
      */
-    public static function isTestActiveForCurrentUser(int $testId, int $currentUserId): bool
-    {
-        // TODO REMOVE THIS
-        date_default_timezone_set('Europe/Sofia');
-        $now = Carbon::now();
-        return self::isTestVisibleForCurrentUser($currentUserId, $testId, $now)
-            && !self::findTestExecutionInDb($currentUserId, $testId);
-    }
-
-    /**
-     * @param int $currentUserId
-     * @param int $testId
-     * @param Carbon $now
-     * @return mixed
-     */
-    public static function isTestVisibleForCurrentUser(int $currentUserId, int $testId, Carbon $now)
-    {
-        return TestHasVisibleUsers::join('test_instances as ti', 'ti.id', '=', 'test_has_visible_users.test_instance_id')
-            ->where('ti.test_id', '=', $testId)
-            ->where('test_has_visible_users.user_id', '=', $currentUserId)
-            ->where('ti.active_from', '<=', $now)
-            ->where('ti.active_to', '>=', $now)
-            ->exists();
-    }
-
-    /**
-     * @param int $currentUserId
-     * @param int $testId
-     * @param bool $onGoing
-     * @return mixed
-     */
-    public static function findTestExecutionInDb(int $currentUserId, int $testId, bool $onGoing = false)
-    {
-        $query = TestExecution::where('test_id', '=', $testId)
-            ->where('user_id', '=', $currentUserId);
-
-        if ($onGoing) {
-            $query->whereNull('end_time');
-        } else {
-            $query->whereNotNull('end_time');
-        }
-
-        return $query->first();
-    }
-
-    /**
-     * @param int $currentUserId
-     * @param int $testId
-     * @return TestExecution
-     */
-    public static function startTestExecution(int $currentUserId, int $testId): TestExecution
-    {
-        date_default_timezone_set('Europe/Sofia');
-
-        $testExecution = new TestExecution();
-        $testExecution->start_time = Carbon::now();
-        $testExecution->user_id = $currentUserId;
-        $testExecution->test_id = $testId;
-        $testExecution->save();
-
-        return $testExecution;
-    }
-
-    /**
-     * @param int $testId
-     * @return \Illuminate\Support\Collection
-     */
-    public static function getExecutionQuestionAnswers(int $testId): \Illuminate\Support\Collection
-    {
-        return DB::table('test_questions as tq')
-            ->join('questions as q', 'q.id', '=', 'tq.question_id')
-            ->leftJoin('question_answers as qa', function ($join) {
-                $join->on('qa.question_id', '=', 'q.id')
-                    ->whereIn('q.question_type_id', QuestionType::CLOSED_QUESTIONS);
-            })
-            ->where('tq.test_id', '=', $testId)
-            ->select([
-                'q.id',
-                'q.text',
-                'q.instruction',
-                'q.points',
-                'question_type_id',
-                'q.max_markable_answers',
-                DB::raw('GROUP_CONCAT(CONCAT(qa.id, "-", qa.value)) as answers')
-            ])
-            ->groupBy('q.id')
-            ->get();
-    }
-
     public static function updateTestExecution(TestExecution $testExecution)
     {
         date_default_timezone_set('Europe/Sofia');
         $now = Carbon::now();
 
         $testExecution->end_time = $now;
+
         self::updateTestExecutionResultPoints($testExecution);
+
         $testExecution->save();
     }
 
-    private static function updateTestExecutionResultPoints(TestExecution $testExecution)
+    /**
+     * @param int $testInstanceId
+     * @param int $testExecutionId
+     * @param bool $onlyOpen
+     * @return mixed
+     */
+    public static function getExecutionQuestionAnswers(int $testInstanceId, int $testExecutionId, bool $onlyOpen = false)
     {
-        $testId = $testExecution->test_id;
-        $testExecutionId = $testExecution->id;
-        $questionsArr = self::getQuestionsIdAndPointsArrByTestId($testId);
-        $questionAnswers = self::getQuestionAnswersIdAndQuestionIdArrByQuestions(array_keys($questionsArr));
-        $testExecutionAnswers = self::getTEAsAnswerAndQuestionIdArrByQuestionsAndTE(array_keys($questionsArr), $testExecutionId);
-        $totalPoints = 0;
+        $query = Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
+            ->join('test_instances as ti', 'ti.test_id', '=', 'tq.test_id')
+            ->leftJoin('test_execution_answers as tea', function ($join) use ($testExecutionId) {
+                $join->on('tea.question_id', '=', 'tq.question_id')
+                    ->where('tea.test_execution_id', '=', $testExecutionId);
+            })
+            ->where('ti.id', '=', $testInstanceId)
+            ->select([
+                'questions.id',
+                'questions.text',
+                'questions.instruction',
+                'questions.points',
+                'questions.question_type_id',
+                'questions.max_markable_answers',
+                'tea.response_text_short',
+                'tea.response_text_long',
+                'tea.response_numeric',
+                DB::raw('GROUP_CONCAT(tea.question_answer_id) as closed_question_answers')
+            ]);
 
-        foreach ($questionsArr as $questionId => $points) {
-            $testExecutionAnswersByQuestion = array_keys($testExecutionAnswers, $questionId);
-            $questionAnswersByQuestion = array_keys($questionAnswers, $questionId);
-
-            $difference = array_intersect($testExecutionAnswersByQuestion, $questionAnswersByQuestion);
-            $totalPoints += ($points * (count($difference) /  count($questionAnswersByQuestion)));
+        if ($onlyOpen) {
+            $query->whereIn('questions.question_type_id', QuestionType::OPEN_QUESTIONS);
         }
-        $testExecution->result_points = $totalPoints;
+
+        return $query->groupBy('questions.id')->get();
     }
 
-    private static function getQuestionAnswersIdAndQuestionIdArrByQuestions(array $questionIds)
-    {
-        return QuestionAnswer::whereIn('question_id', $questionIds)
-            ->where('is_correct', '=', 1)
-            ->pluck('question_id', 'id')
-            ->toArray();
-    }
-
-    private static function getTEAsAnswerAndQuestionIdArrByQuestionsAndTE(array $questionIds, int $testExecutionId)
-    {
-        return  TestExecutionAnswer::where('test_execution_id', '=', $testExecutionId)
-            ->whereIn('question_id', $questionIds)
-            ->pluck('question_id', 'question_answer_id')
-            ->toArray();
-    }
-
-    private static function getQuestionsIdAndPointsArrByTestId(int $testId)
-    {
-        return Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
-            ->whereIn('questions.question_type_id', QuestionType::CLOSED_QUESTIONS)
-            ->where('tq.test_id', '=', $testId)
-            ->pluck('points', 'questions.id')
-            ->toArray();
-    }
-
-    private static function getCorrectAnswersProQuestion(int $questionId)
-    {
-        return Question::join('question_answers as qa', 'qa.question_id', '=', 'questions.id')
-            ->where('questions.id', '=', $questionId)
-            ->where('qa.is_correct', '=', 1)
-            ->pluck('qa.id')
-            ->toArray();
-    }
-
+    /**
+     * @param User $currentUser
+     * @return mixed
+     */
     public static function getTestExecutionsIndexQueryBasedOnCurrentUser(User $currentUser)
     {
-        $query = TestExecution::join('tests as t', 't.id', '=', 'test_executions.test_id');
+        $query = TestExecution::join('test_instances as ti', 'ti.id', '=', 'test_executions.test_instance_id')
+            ->join('tests as t', 't.id', '=', 'ti.test_id');
 
-        if (!$currentUser->is_admin) {
+        if (!$currentUser->isAdmin()) {
             $query->where('test_executions.user_id', '=', $currentUser->id);
         }
 
@@ -185,58 +82,49 @@ class TestExecutionService
 
     /**
      * @param int $testExecutionId
-     * @param bool $onlyOpen
-     * @return mixed
+     * @param int $questionId
+     * @return TestExecutionAnswer
      */
-    public static function getTestQuestions(int $testExecutionId, bool $onlyOpen = false)
+    public static function createTestExecutionAnswer(int $testExecutionId, int $questionId): TestExecutionAnswer
     {
-        $query = Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
-            ->leftJoin('test_execution_answers as tea', function ($join) use ($testExecutionId) {
-                $join->on('tea.question_id', '=', 'tq.question_id')
-                    ->where('tea.test_execution_id', '=', $testExecutionId);
-            })
-            ->groupBy('questions.id')
-            ->select([
-                'questions.id',
-                'questions.text',
-                'questions.points',
-                DB::raw('GROUP_CONCAT(tea.question_answer_id) as answer_ids'),
-                'tea.response_text_short',
-                'question_type_id'
-            ]);
-        if ($onlyOpen) {
-            $query->whereIn('questions.question_type_id', QuestionType::OPEN_QUESTIONS);
+        $questionAnswer = new TestExecutionAnswer();
+        $questionAnswer->test_execution_id = $testExecutionId;
+        $questionAnswer->question_id = $questionId;
+
+        return $questionAnswer;
+    }
+
+    /**
+     * @param int $currentUserId
+     * @param int $testInstanceId
+     * @return int
+     */
+    public static function createTestExecution(int $currentUserId, int $testInstanceId): int
+    {
+        $testExecution = new TestExecution();
+        $testExecution->start_time = Carbon::now();
+        $testExecution->user_id = $currentUserId;
+        $testExecution->test_instance_id = $testInstanceId;
+        $testExecution->save();
+
+        return $testExecution->id;
+    }
+
+    /**
+     * @param int $testExecutionId
+     * @param int $questionId
+     * @return TestExecutionAnswer
+     */
+    public static function getTestExecutionAnswer(int $testExecutionId, int $questionId): TestExecutionAnswer
+    {
+        // first look in db if answer already exists
+        $questionAnswer = self::findExistingTestExecutionAnswerInDb($testExecutionId, $questionId);
+
+        // no answer is found, create new one
+        if (is_null($questionAnswer)) {
+            $questionAnswer = self::createTestExecutionAnswer($testExecutionId, $questionId);
         }
-        return $query->get();
-    }
-
-    /**
-     * @param int $testExecutionId
-     * @param int $questionId
-     * @param int|null $answerId
-     * @param string|null $inputText
-     * @return void
-     */
-    public static function insertTestExecutionAnswer(int $testExecutionId, int $questionId,
-                                                     ?int $answerId = null, ?string $inputText = null)
-    {
-        TestExecutionAnswer::insert([
-            'test_execution_id' => $testExecutionId,
-            'question_id' => $questionId,
-            'question_answer_id' => $answerId,
-            'response_text_short' => $inputText
-        ]);
-    }
-
-    /**
-     * @param int $testExecutionId
-     * @param int $questionId
-     * @return mixed
-     */
-    private static function getExecutionAnswerQueryByTestExecutionAndQuestionId(int $testExecutionId, int $questionId)
-    {
-        return TestExecutionAnswer::where('test_execution_id', '=', $testExecutionId)
-            ->where('question_id', '=', $questionId);
+        return $questionAnswer;
     }
 
     /**
@@ -267,5 +155,65 @@ class TestExecutionService
         $answersInDb = self::getExecutionAnswerQueryByTestExecutionAndQuestionId($testExecutionId, $questionId)->count();
 
         return $answersInDb >= $maxMarkableAnswersCount;
+    }
+
+    /**
+     * @param int $testExecutionId
+     * @param int $questionId
+     * @return mixed
+     */
+    private static function getExecutionAnswerQueryByTestExecutionAndQuestionId(int $testExecutionId, int $questionId)
+    {
+        return TestExecutionAnswer::where('test_execution_id', '=', $testExecutionId)
+            ->where('question_id', '=', $questionId);
+    }
+
+    /**
+     * @param TestExecution $testExecution
+     * @return void
+     */
+    private static function updateTestExecutionResultPoints(TestExecution $testExecution)
+    {
+        /** @var Test $test */
+        $test = TestService::findTestByTestInstance($testExecution->test_instance_id);
+        $testExecutionId = $testExecution->id;
+        $questions = self::getClosedQuestions($test->id);
+        $testExecutionAnswers = self::getTestExecutionAnswers($questions->pluck('id')->toArray(), $testExecutionId);
+        $totalPoints = 0;
+
+        foreach ($questions as $question) {
+            $correctAnswerIds = $question->answers->where('is_correct', '=', 1)->pluck('id')->toArray();
+            $givenAnswers =  array_keys($testExecutionAnswers, $question->id);
+
+            $difference = array_intersect($givenAnswers, $correctAnswerIds);
+            $totalPoints += ($question->points * (count($difference) / count($correctAnswerIds)));
+        }
+        $testExecution->result_points = $totalPoints;
+    }
+
+    /**
+     * @param int $testId
+     * @return mixed
+     */
+    private static function getClosedQuestions(int $testId)
+    {
+        return Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
+            ->where('tq.test_id', '=', $testId)
+            ->whereIn('questions.question_type_id', QuestionType::CLOSED_QUESTIONS)
+            ->select('questions.*')
+            ->get();
+    }
+
+    /**
+     * @param array $questionIds
+     * @param int $testExecutionId
+     * @return mixed
+     */
+    private static function getTestExecutionAnswers(array $questionIds, int $testExecutionId)
+    {
+        return TestExecutionAnswer::where('test_execution_id', '=', $testExecutionId)
+            ->whereIn('question_id', $questionIds)
+            ->pluck('question_id', 'question_answer_id')
+            ->toArray();
     }
 }
