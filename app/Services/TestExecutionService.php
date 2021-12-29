@@ -14,14 +14,13 @@ use Illuminate\Support\Facades\DB;
 class TestExecutionService
 {
     /**
-     * @param TestExecution $testExecution
+     * @param int $testExecutionId
+     * @param Carbon $now
      * @return void
      */
-    public static function updateTestExecution(TestExecution $testExecution)
+    public static function updateTestExecution(int $testExecutionId, Carbon $now)
     {
-        date_default_timezone_set('Europe/Sofia');
-        $now = Carbon::now();
-
+        $testExecution = TestExecution::findOrFail($testExecutionId);
         $testExecution->end_time = $now;
 
         self::updateTestExecutionResultPoints($testExecution);
@@ -101,9 +100,9 @@ class TestExecutionService
     /**
      * @param int $currentUserId
      * @param int $testInstanceId
-     * @return int
+     * @return TestExecution
      */
-    public static function createTestExecution(int $currentUserId, int $testInstanceId): int
+    public static function createTestExecution(int $currentUserId, int $testInstanceId): TestExecution
     {
         $testExecution = new TestExecution();
         $testExecution->start_time = Carbon::now();
@@ -111,7 +110,7 @@ class TestExecutionService
         $testExecution->test_instance_id = $testInstanceId;
         $testExecution->save();
 
-        return $testExecution->id;
+        return $testExecution;
     }
 
     /**

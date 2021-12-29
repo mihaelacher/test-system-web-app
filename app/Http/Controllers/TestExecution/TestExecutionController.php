@@ -79,7 +79,9 @@ class TestExecutionController extends AuthController
      */
     public function submit(TestExecutionSubmitRequest $request, $id)
     {
-        TestExecutionService::updateTestExecution(TestExecution::findOrFail($id));
+        date_default_timezone_set('Europe/Sofia');
+
+        TestExecutionService::updateTestExecution($id, Carbon::now());
 
         MessageUtil::success('You\'ve successfully submitted the test!');
 
