@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Authorization\User;
 use App\Models\Question\Question;
 use App\Models\Question\QuestionType;
-use App\Models\Test\Test;
 use App\Models\Test\TestExecution;
 use App\Models\Test\TestExecutionAnswer;
 use Carbon\Carbon;
@@ -32,9 +31,11 @@ class TestExecutionService
      * @param int $testInstanceId
      * @param int $testExecutionId
      * @param bool $onlyOpen
+     * @param bool $onlyClosed
      * @return mixed
      */
-    public static function getExecutionQuestionAnswers(int $testInstanceId, int $testExecutionId, bool $onlyOpen = false)
+    public static function getExecutionQuestionAnswers(int $testInstanceId, int $testExecutionId,
+                                                       bool $onlyOpen = false, bool $onlyClosed = false)
     {
         $query = Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
             ->join('test_instances as ti', 'ti.test_id', '=', 'tq.test_id')
@@ -58,6 +59,10 @@ class TestExecutionService
 
         if ($onlyOpen) {
             $query->whereIn('questions.question_type_id', QuestionType::OPEN_QUESTIONS);
+        }
+
+        if ($onlyClosed) {
+            $query->whereIn('questions.question_type_id', QuestionType::CLOSED_QUESTIONS);
         }
 
         return $query->groupBy('questions.id')->get();
@@ -177,46 +182,17 @@ class TestExecutionService
      */
     private static function updateTestExecutionResultPoints(TestExecution $testExecution)
     {
-        /** @var Test $test */
-        $test = TestService::findTestByTestInstance($testExecution->test_instance_id);
-        $testExecutionId = $testExecution->id;
-        $questions = self::getClosedQuestions($test->id);
-        $testExecutionAnswers = self::getTestExecutionAnswers($questions->pluck('id')->toArray(), $testExecutionId);
+        $questions = self::getExecutionQuestionAnswers($testExecution->test_instance_id,
+            $testExecution->id, false, true);
         $totalPoints = 0;
 
         foreach ($questions as $question) {
             $correctAnswerIds = $question->answers->where('is_correct', '=', 1)->pluck('id')->toArray();
-            $givenAnswers =  array_keys($testExecutionAnswers, $question->id);
+            $givenAnswers = explode(',', $question->closed_question_answers);
 
             $difference = array_intersect($givenAnswers, $correctAnswerIds);
             $totalPoints += ($question->points * (count($difference) / count($correctAnswerIds)));
         }
         $testExecution->result_points = $totalPoints;
-    }
-
-    /**
-     * @param int $testId
-     * @return mixed
-     */
-    private static function getClosedQuestions(int $testId)
-    {
-        return Question::join('test_questions as tq', 'tq.question_id', '=', 'questions.id')
-            ->where('tq.test_id', '=', $testId)
-            ->whereIn('questions.question_type_id', QuestionType::CLOSED_QUESTIONS)
-            ->select('questions.*')
-            ->get();
-    }
-
-    /**
-     * @param array $questionIds
-     * @param int $testExecutionId
-     * @return mixed
-     */
-    private static function getTestExecutionAnswers(array $questionIds, int $testExecutionId)
-    {
-        return TestExecutionAnswer::where('test_execution_id', '=', $testExecutionId)
-            ->whereIn('question_id', $questionIds)
-            ->pluck('question_id', 'question_answer_id')
-            ->toArray();
     }
 }
