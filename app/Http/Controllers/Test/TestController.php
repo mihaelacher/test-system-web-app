@@ -135,10 +135,7 @@ class TestController extends AuthController
      */
     public function storeInvitations(StoreTestInvitationsRequest $request, $id)
     {
-        $activeFrom = Carbon::parse($request->active_from);
-        $activeTo = Carbon::parse($request->active_to);
-
-        TestService::createTestInstance($id, $activeFrom, $activeTo, $request->selected_user_ids);
+        TestService::handleTestInvitations($id, $request);
 
         MessageUtil::success('You\'ve successfully invited users to the test!');
 

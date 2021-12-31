@@ -64,4 +64,12 @@ class User extends MainModel implements AuthenticatableContract, CanResetPasswor
     {
         return $this->is_admin;
     }
+
+    /**
+     * @return string
+     */
+    public function fullName(): string
+    {
+        return implode(' ', [$this->first_name, $this->last_name]);
+    }
 }

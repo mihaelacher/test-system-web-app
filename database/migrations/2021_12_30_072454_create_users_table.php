@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name');
             $table->string('email');
+            $table->string('password');
             $table->unsignedTinyInteger('is_admin')->default(0);
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();

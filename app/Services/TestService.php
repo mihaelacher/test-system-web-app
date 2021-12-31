@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
-use App\Exceptions\TestUpdateException;
+use App\Exceptions\TestInvitationException;
 use App\Http\Requests\MainFormRequest;
+use App\Http\Requests\Test\StoreTestInvitationsRequest;
+use App\Mail\TestInvitation;
 use App\Models\Authorization\User;
 use App\Models\Question\QuestionType;
 use App\Models\Test\Test;
@@ -14,6 +16,7 @@ use App\Util\LogUtil;
 use App\Util\MessageUtil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TestService
 {
@@ -31,10 +34,10 @@ class TestService
                 $request->is_public, $request->intro_text);
 
             if (!$testId) {
-                throw new TestUpdateException('Test couldn\'t be saved in DB!');
+                throw new TestInvitationException('Test couldn\'t be saved in DB!');
             }
 
-            self::mapQuestionToTest($testId,$request->selected_question_ids);
+            self::mapQuestionToTest($testId, $request->selected_question_ids);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -43,6 +46,42 @@ class TestService
             LogUtil::logError($e->getMessage());
 
             MessageUtil::error('Oops...something went wrong!');
+        }
+    }
+
+    public static function handleTestInvitations(int $testId, StoreTestInvitationsRequest $request)
+    {
+        try {
+            $activeFrom = Carbon::parse($request->active_from);
+            $activeTo = Carbon::parse($request->active_to);
+            $selectedUserIds = $request->selected_user_ids;
+
+            TestService::createTestInstance($testId, $activeFrom, $activeTo, $selectedUserIds);
+
+            TestService::sendEmailToParticipant($request->currentUser->fullName(), $activeFrom, $activeTo, $selectedUserIds);
+
+        } catch (TestInvitationException $e) {
+            LogUtil::logError($e->getMessage());
+
+            MessageUtil::error('Oops, something went wrong!');
+        }
+    }
+
+    public static function destroyTest(int $testId)
+    {
+        try {
+            DB::beginTransaction();
+
+            TestQuestions::where('test_id', '=', $testId)->delete();
+            Test::findOrFail($testId)->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            LogUtil::error($e->getMessage());
+
+            MessageUtil::error('Oops...something went wrong');
         }
     }
 
@@ -65,42 +104,6 @@ class TestService
                 ->where('thvu.user_id', '=', $currentUser->id);
         }
         return $query->select(['tests.id', 'name', 'intro_text', 'max_duration']);
-    }
-
-    /**
-     * @param int $testId
-     * @param Carbon $activeFrom
-     * @param Carbon $activeTo
-     * @param array $userIds
-     * @return void
-     */
-    public static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo, array $userIds): void
-    {
-        $testInstance = new TestInstance();
-        $testInstance->test_id = $testId;
-        $testInstance->active_from = $activeFrom;
-        $testInstance->active_to = $activeTo;
-        $testInstance->save();
-
-        self::mapUserToTest($testInstance->id, $userIds);
-    }
-
-    public static function destroyTest(int $testId)
-    {
-        try {
-            DB::beginTransaction();
-
-            TestQuestions::where('test_id', '=', $testId)->delete();
-            Test::findOrFail($testId)->delete();
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            LogUtil::error($e->getMessage());
-
-            MessageUtil::error('Oops...something went wrong');
-        }
     }
 
     /**
@@ -175,6 +178,40 @@ class TestService
     }
 
     /**
+     * @param string $creator
+     * @param Carbon $fromTime
+     * @param Carbon $toTime
+     * @param array $invitedUserIds
+     * @return void
+     */
+    private static function sendEmailToParticipant(string $creator, Carbon $fromTime, Carbon $toTime, array $invitedUserIds)
+    {
+        foreach ($invitedUserIds as $userId) {
+            Mail::to(User::findOrFail($userId)->send(new TestInvitation($creator, $fromTime, $toTime)));
+        }
+    }
+
+    /**
+     * @param int $testId
+     * @param Carbon $activeFrom
+     * @param Carbon $activeTo
+     * @param array $userIds
+     * @return TestInstance
+     */
+    private static function createTestInstance(int $testId, Carbon $activeFrom, Carbon $activeTo, array $userIds): TestInstance
+    {
+        $testInstance = new TestInstance();
+        $testInstance->test_id = $testId;
+        $testInstance->active_from = $activeFrom;
+        $testInstance->active_to = $activeTo;
+        $testInstance->save();
+
+        self::mapUserToTest($testInstance->id, $userIds);
+
+        return $testInstance;
+    }
+
+    /**
      * @param int $testInstanceId
      * @param array $userIds
      * @return void
@@ -201,7 +238,7 @@ class TestService
      * @return int
      */
     private static function setTestAttributes(Test $test, string $name, int $maxDuration,
-                                              int $isPublic, ?string $introText = null): int
+                                              int  $isPublic, ?string $introText = null): int
     {
         $test->name = $name;
         $test->intro_text = $introText;
