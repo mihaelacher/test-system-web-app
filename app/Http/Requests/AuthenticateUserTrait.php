@@ -75,7 +75,7 @@ trait AuthenticateUserTrait
     protected function sendFailedLoginResponse(Request $request): void
     {
         throw ValidationException::withMessages([
-            'username' => 'Wrong Credentials' // TODO: use trans([...]) here
+            'username' => 'Wrong Credentials'
         ]);
     }
 

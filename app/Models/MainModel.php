@@ -12,8 +12,6 @@ abstract class MainModel extends Model
     {
         parent::boot();
         static::saving(function ($model) {
-            // TODO replace user_id in test_executions with created_by
-            // (we won't need user_id in this case)
             if (Schema::hasColumn($model->getTable(), 'created_by')) {
                 $model->created_by = Auth::user()->id;
             }
