@@ -128,7 +128,7 @@ class TestService
      */
     public static function findExistingTestInstanceInDB(User $currentUser, int $testId, bool $onlyActive = true)
     {
-        date_default_timezone_set('Europe/Sofia');
+        // php.ini date_default_timezone_set('Europe/Sofia');
         $now = Carbon::now();
         $userId = $currentUser->id;
 

@@ -56,7 +56,7 @@ class TestExecutionController extends AuthController
      */
     public function execute(TestExecutionStartRequest $request, $id)
     {
-        date_default_timezone_set('Europe/Sofia');
+     // php.ini   date_default_timezone_set('Europe/Sofia');
         $testExecution = TestExecution::findOrFail($id);
         $testInstanceId = $testExecution->test_instance_id;
 
@@ -79,7 +79,7 @@ class TestExecutionController extends AuthController
      */
     public function submit(TestExecutionSubmitRequest $request, $id)
     {
-        date_default_timezone_set('Europe/Sofia');
+       // php.ini date_default_timezone_set('Europe/Sofia');
 
         TestExecutionService::updateTestExecution($id, Carbon::now());
 

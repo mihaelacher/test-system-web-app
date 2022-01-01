@@ -117,7 +117,7 @@ class TestExecutionPolicy
      */
     private function isTestExecutionOpen(TestExecution $testExecution): bool
     {
-        date_default_timezone_set('Europe/Sofia');
+        // php.ini date_default_timezone_set('Europe/Sofia');
         $executionMaxDuration = TestService::getTestMaxDurationByTestInstanceId($testExecution->test_instance_id);
 
         return Carbon::parse($testExecution->start_time)->addMinutes($executionMaxDuration) > Carbon::now();
